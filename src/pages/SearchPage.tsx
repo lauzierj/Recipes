@@ -15,8 +15,9 @@ export default function SearchPage() {
   const [tagFilter, setTagFilter] = useState('');
 
   useEffect(() => {
-    fetch('/recipes.json').then(r => r.json()).then(setRecipes);
-    fetch('/tags.json').then(r => r.json()).then(setTags);
+    const base = import.meta.env.BASE_URL;
+    fetch(`${base}recipes.json`).then(r => r.json()).then(setRecipes);
+    fetch(`${base}tags.json`).then(r => r.json()).then(setTags);
   }, []);
 
   const filtered = recipes.filter(r =>
