@@ -13,7 +13,8 @@ export default function RecipePage() {
   const [recipe, setRecipe] = useState<Recipe | null>(null);
 
   useEffect(() => {
-    fetch('/recipes.json')
+    const base = import.meta.env.BASE_URL;
+    fetch(`${base}recipes.json`)
       .then(r => r.json())
       .then((list: Recipe[]) => {
         setRecipe(list.find(r => r.slug === slug) || null);
