@@ -2,8 +2,12 @@
   "compilerOptions": {
     "target": "ES2017",
     "module": "ESNext",
+    "moduleResolution": "Node",
     "lib": ["ES2017", "DOM"],
-    "strict": true
+    "strict": true,
+    "jsx": "react-jsx",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true
   },
-  "include": ["src/search.ts"]
+  "include": ["src"]
 }
