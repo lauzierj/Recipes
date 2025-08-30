@@ -1,4 +1,4 @@
-site/
 node_modules/
-static/search.js
-
+dist/
+public/recipes.json
+public/tags.json
