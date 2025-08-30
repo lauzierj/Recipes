@@ -7,6 +7,7 @@ export default defineConfig({
     emptyOutDir: false,
     lib: {
       entry: resolve(__dirname, 'src/search.ts'),
+      name: 'search',
       formats: ['iife'],
       fileName: () => 'search.js'
     }
