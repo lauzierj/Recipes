@@ -29,7 +29,7 @@ export default function RecipePage() {
 
   // Process image URLs in content for recipepackage images
   const processedContent = recipe.content.replace(
-    /!\[([^\]]*)\]\(([-\w]+\.webp)\)/g,
+    /!\[([^\]]*)\]\(([-\w]+\.(webp|jpeg|jpg|png|gif))\)/gi,
     (match, alt, filename) => {
       // Check if this is a recipepackage by looking for Photos/ directory
       const packageBase = `${import.meta.env.BASE_URL}recipes/${slug}.recipepackage/Photos/`;
