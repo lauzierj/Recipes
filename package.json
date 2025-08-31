@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "prebuild": "node scripts/build-data.mjs",
-    "build": "vite build"
+    "build": "vite build",
+    "postbuild": "cp dist/index.html dist/404.html"
   },
   "dependencies": {
     "react": "^18.2.0",
