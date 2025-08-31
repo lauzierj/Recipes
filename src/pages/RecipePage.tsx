@@ -8,6 +8,7 @@ interface Recipe {
   slug: string;
   tags: string[];
   content: string;
+  packageFolder?: string;
 }
 
 export default function RecipePage() {
@@ -31,8 +32,9 @@ export default function RecipePage() {
   const processedContent = recipe.content.replace(
     /!\[([^\]]*)\]\(([-\w]+\.(webp|jpeg|jpg|png|gif))\)/gi,
     (match, alt, filename) => {
-      // Check if this is a recipepackage by looking for Photos/ directory
-      const packageBase = `${import.meta.env.BASE_URL}recipes/${slug}.recipepackage/Photos/`;
+      // Use the actual package folder name if available, otherwise fall back to slug
+      const folderName = recipe.packageFolder || `${slug}.recipepackage`;
+      const packageBase = `${import.meta.env.BASE_URL}recipes/${folderName}/Photos/`;
       return `![${alt}](${packageBase}${filename})`;
     }
   );

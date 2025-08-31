@@ -1,5 +1,5 @@
 import { readdir, readFile, writeFile } from 'fs/promises';
-import { join, extname, basename } from 'path';
+import { join, extname, basename, dirname } from 'path';
 
 async function getRecipeFiles(dir) {
   const entries = await readdir(dir, { withFileTypes: true });
@@ -43,7 +43,16 @@ async function build() {
     const tags = extractTags(content);
     tags.forEach(t => allTags.add(t));
     const slug = slugify(title);
-    recipes.push({ title, slug, tags, content });
+    
+    // Check if this is a recipepackage
+    const parentDir = basename(dirname(file));
+    const packageFolder = parentDir.endsWith('.recipepackage') ? parentDir : null;
+    
+    const recipe = { title, slug, tags, content };
+    if (packageFolder) {
+      recipe.packageFolder = packageFolder;
+    }
+    recipes.push(recipe);
   }
 
   await writeFile(join('public', 'recipes.json'), JSON.stringify(recipes, null, 2));
