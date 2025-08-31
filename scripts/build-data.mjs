@@ -1,5 +1,6 @@
-import { readdir, readFile, writeFile } from 'fs/promises';
-import { join, extname, basename } from 'path';
+import { readdir, readFile, writeFile, cp, mkdir } from 'fs/promises';
+import { join, extname, basename, dirname } from 'path';
+import { existsSync } from 'fs';
 
 async function getRecipeFiles(dir) {
   const entries = await readdir(dir, { withFileTypes: true });
@@ -29,8 +30,33 @@ function slugify(title) {
   return title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 }
 
+async function copyRecipePackages(srcDir, destDir) {
+  const entries = await readdir(srcDir, { withFileTypes: true });
+  
+  for (const entry of entries) {
+    if (entry.isDirectory() && entry.name.endsWith('.recipepackage')) {
+      const packageSrc = join(srcDir, entry.name);
+      const packageDest = join(destDir, entry.name);
+      
+      // Copy the entire package directory including Photos
+      await cp(packageSrc, packageDest, { recursive: true });
+    }
+  }
+}
+
 async function build() {
   const dir = join(process.cwd(), 'recipes');
+  const publicDir = join(process.cwd(), 'public');
+  const publicRecipesDir = join(publicDir, 'recipes');
+  
+  // Ensure public/recipes directory exists
+  if (!existsSync(publicRecipesDir)) {
+    await mkdir(publicRecipesDir, { recursive: true });
+  }
+  
+  // Copy all .recipepackage directories to public/recipes
+  await copyRecipePackages(dir, publicRecipesDir);
+  
   const files = await getRecipeFiles(dir);
   const recipes = [];
   const allTags = new Set();
