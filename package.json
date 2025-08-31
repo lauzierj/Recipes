@@ -5,7 +5,7 @@
   "scripts": {
     "prebuild": "node scripts/build-data.mjs",
     "build": "vite build",
-    "postbuild": "cp dist/index.html dist/404.html"
+    "postbuild": "cp dist/index.html dist/404.html && node scripts/copy-images.mjs"
   },
   "dependencies": {
     "react": "^18.2.0",
