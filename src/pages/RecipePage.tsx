@@ -33,7 +33,7 @@ export default function RecipePage() {
     /!\[([^\]]*)\]\(([-\w]+\.(webp|jpeg|jpg|png|gif))\)/gi,
     (match, alt, filename) => {
       // Use the actual package folder name if available, otherwise fall back to slug
-      const folderName = recipe.packageFolder || `${slug}.recipepackage`;
+      const folderName = recipe.packageFolder || `${recipe.slug}.recipepackage`;
       const packageBase = `${import.meta.env.BASE_URL}recipes/${folderName}/Photos/`;
       return `![${alt}](${packageBase}${filename})`;
     }
