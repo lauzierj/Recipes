@@ -1,5 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import {
+  Box,
+  Container,
+  Heading,
+  Input,
+  HStack,
+  Button,
+  Badge,
+  VStack,
+  Text,
+  Link as ChakraLink,
+  Flex,
+  Card,
+  CardBody
+} from '@chakra-ui/react';
 
 interface Recipe {
   title: string;
@@ -35,106 +50,97 @@ export default function SearchPage() {
   );
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
-      <h1 style={{ fontSize: '2.5rem', marginBottom: '1.5rem' }}>Recipes</h1>
-      <input
-        placeholder="Search recipes..."
-        value={query}
-        onChange={e => setQuery(e.target.value)}
-        style={{
-          width: '100%',
-          padding: '10px',
-          fontSize: '16px',
-          border: '1px solid #ddd',
-          borderRadius: '4px',
-          marginBottom: '1rem'
-        }}
-      />
-      <div style={{ marginBottom: '1.5rem' }}>
-        <strong>Filter by tag:</strong>
-        <button
-          onClick={() => setTagFilter('')}
-          style={{
-            marginLeft: '0.5rem',
-            padding: '6px 12px',
-            border: tagFilter === '' ? '2px solid #0066cc' : '1px solid #ddd',
-            borderRadius: '4px',
-            backgroundColor: tagFilter === '' ? '#e6f2ff' : 'white',
-            cursor: 'pointer',
-            fontSize: '14px'
-          }}
-        >
-          All
-        </button>
-        {tags.map(t => (
-          <button
-            key={t}
-            onClick={() => setTagFilter(t)}
-            style={{
-              marginLeft: '0.5rem',
-              padding: '6px 12px',
-              border: tagFilter === t ? '2px solid #0066cc' : '1px solid #ddd',
-              borderRadius: '4px',
-              backgroundColor: tagFilter === t ? '#e6f2ff' : 'white',
-              cursor: 'pointer',
-              fontSize: '14px'
-            }}
-          >
-            #{t}
-          </button>
-        ))}
-      </div>
-      {tagFilter && (
-        <div style={{
-          padding: '10px',
-          backgroundColor: '#f0f8ff',
-          borderRadius: '4px',
-          marginBottom: '1rem'
-        }}>
-          Showing recipes tagged with <strong>#{tagFilter}</strong>
-        </div>
-      )}
-      <ul style={{ listStyle: 'none', padding: 0 }}>
-        {filtered.map(r => (
-          <li key={r.slug} style={{
-            padding: '12px',
-            borderBottom: '1px solid #eee',
-            transition: 'background-color 0.2s'
-          }}>
-            <Link
-              to={`/recipe/${r.slug}`}
-              style={{
-                color: '#0066cc',
-                textDecoration: 'none',
-                fontSize: '18px',
-                fontWeight: '500'
-              }}
+    <Container maxW="container.lg" py={8}>
+      <VStack align="stretch" gap={6}>
+        <Heading size="2xl" color="fg">Recipes</Heading>
+        
+        <Input
+          placeholder="Search recipes..."
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+          size="lg"
+          bg="bg.subtle"
+          borderColor="border"
+          _hover={{ borderColor: "border.subtle" }}
+          _focus={{ borderColor: "blue.500", boxShadow: "0 0 0 1px var(--chakra-colors-blue-500)" }}
+        />
+
+        <Box>
+          <Text fontWeight="semibold" mb={3} color="fg">Filter by tag:</Text>
+          <Flex wrap="wrap" gap={2}>
+            <Button
+              size="sm"
+              variant={tagFilter === '' ? 'solid' : 'outline'}
+              colorPalette={tagFilter === '' ? 'blue' : 'gray'}
+              onClick={() => setTagFilter('')}
             >
-              {r.title}
-            </Link>
-            {r.tags.length > 0 && (
-              <div style={{ marginTop: '4px' }}>
-                {r.tags.map(tag => (
-                  <span
-                    key={tag}
-                    style={{
-                      display: 'inline-block',
-                      marginRight: '8px',
-                      fontSize: '12px',
-                      color: '#666',
-                      backgroundColor: '#f0f0f0',
-                      padding: '2px 8px',
-                      borderRadius: '12px'
-                    }}
-                  >
-                    #{tag}
-                  </span>
-                ))}
-              </div>
-            )}
-          </li>
-        ))}
-      </ul>
-    </div>
+              All
+            </Button>
+            {tags.map(t => (
+              <Button
+                key={t}
+                size="sm"
+                variant={tagFilter === t ? 'solid' : 'outline'}
+                colorPalette={tagFilter === t ? 'blue' : 'gray'}
+                onClick={() => setTagFilter(t)}
+              >
+                #{t}
+              </Button>
+            ))}
+          </Flex>
+        </Box>
+
+        {tagFilter && (
+          <Card bg="blue.900/20" borderColor="blue.500/30" borderWidth="1px">
+            <CardBody>
+              <Text color="fg">
+                Showing recipes tagged with <Text as="span" fontWeight="bold">#{tagFilter}</Text>
+              </Text>
+            </CardBody>
+          </Card>
+        )}
+
+        <VStack align="stretch" gap={2}>
+          {filtered.map(r => (
+            <Card
+              key={r.slug}
+              variant="subtle"
+              bg="bg.subtle"
+              _hover={{ bg: "bg.muted" }}
+              transition="all 0.2s"
+            >
+              <CardBody>
+                <ChakraLink asChild _hover={{ textDecoration: 'none' }}>
+                  <Link to={`/recipe/${r.slug}`}>
+                    <Text
+                      fontSize="lg"
+                      fontWeight="medium"
+                      color="blue.400"
+                      mb={2}
+                    >
+                      {r.title}
+                    </Text>
+                  </Link>
+                </ChakraLink>
+                {r.tags.length > 0 && (
+                  <HStack wrap="wrap" gap={2}>
+                    {r.tags.map(tag => (
+                      <Badge
+                        key={tag}
+                        colorPalette="gray"
+                        variant="subtle"
+                        size="sm"
+                      >
+                        #{tag}
+                      </Badge>
+                    ))}
+                  </HStack>
+                )}
+              </CardBody>
+            </Card>
+          ))}
+        </VStack>
+      </VStack>
+    </Container>
   );
 }

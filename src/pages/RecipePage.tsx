@@ -2,6 +2,20 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import {
+  Container,
+  Heading,
+  Text,
+  Box,
+  Link as ChakraLink,
+  Badge,
+  HStack,
+  Image,
+  Spinner,
+  Center,
+  List
+} from '@chakra-ui/react';
+import { LuArrowLeft } from 'react-icons/lu';
 
 interface Recipe {
   title: string;
@@ -25,7 +39,11 @@ export default function RecipePage() {
   }, [slug]);
 
   if (!recipe) {
-    return <div>Loading...</div>;
+    return (
+      <Center h="50vh">
+        <Spinner size="xl" color="blue.500" />
+      </Center>
+    );
   }
 
   // Process image URLs in content for recipepackage images
@@ -40,34 +58,47 @@ export default function RecipePage() {
   );
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
+    <Container maxW="container.lg" py={8}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
           h1: ({ children }) => (
-            <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>{children}</h1>
+            <Heading as="h1" size="2xl" mb={6} color="fg">
+              {children}
+            </Heading>
+          ),
+          h2: ({ children }) => (
+            <Heading as="h2" size="xl" mt={8} mb={4} color="fg">
+              {children}
+            </Heading>
+          ),
+          h3: ({ children }) => (
+            <Heading as="h3" size="lg" mt={6} mb={3} color="fg">
+              {children}
+            </Heading>
           ),
           blockquote: ({ children }) => (
-            <blockquote style={{
-              borderLeft: '4px solid #ccc',
-              paddingLeft: '1rem',
-              marginLeft: 0,
-              fontStyle: 'italic',
-              color: '#666'
-            }}>
+            <Box
+              as="blockquote"
+              borderLeft="4px solid"
+              borderColor="border"
+              pl={4}
+              ml={0}
+              fontStyle="italic"
+              color="fg.muted"
+              my={4}
+            >
               {children}
-            </blockquote>
+            </Box>
           ),
           img: ({ src, alt }) => (
-            <img
+            <Image
               src={src}
               alt={alt}
-              style={{
-                maxWidth: '100%',
-                height: 'auto',
-                borderRadius: '8px',
-                margin: '1rem 0'
-              }}
+              maxW="100%"
+              h="auto"
+              borderRadius="md"
+              my={6}
             />
           ),
           a: ({ href, children }) => {
@@ -75,32 +106,112 @@ export default function RecipePage() {
             if (href?.startsWith('#') && typeof children === 'string' && children.startsWith('#')) {
               const tag = children.substring(1);
               return (
-                <Link
-                  to={`/?tag=${encodeURIComponent(tag)}`}
-                  style={{ color: '#0066cc', textDecoration: 'none' }}
-                >
-                  {children}
-                </Link>
+                <ChakraLink asChild color="blue.400" _hover={{ textDecoration: 'underline' }}>
+                  <Link to={`/?tag=${encodeURIComponent(tag)}`}>
+                    {children}
+                  </Link>
+                </ChakraLink>
               );
             }
-            return <a href={href} style={{ color: '#0066cc' }}>{children}</a>;
+            return (
+              <ChakraLink href={href} color="blue.400" isExternal>
+                {children}
+              </ChakraLink>
+            );
           },
           ul: ({ children }) => (
-            <ul style={{ marginLeft: '1.5rem', marginBottom: '1rem' }}>{children}</ul>
+            <List.Root as="ul" ml={6} mb={4} gap={2}>
+              {children}
+            </List.Root>
+          ),
+          ol: ({ children }) => (
+            <List.Root as="ol" ml={6} mb={4} gap={2}>
+              {children}
+            </List.Root>
           ),
           li: ({ children }) => (
-            <li style={{ marginBottom: '0.5rem' }}>{children}</li>
+            <List.Item color="fg">
+              {children}
+            </List.Item>
           ),
           p: ({ children }) => (
-            <p style={{ lineHeight: '1.6', marginBottom: '1rem' }}>{children}</p>
+            <Text lineHeight="tall" mb={4} color="fg">
+              {children}
+            </Text>
+          ),
+          code: ({ children }) => (
+            <Box
+              as="code"
+              bg="bg.muted"
+              px={2}
+              py={0.5}
+              borderRadius="sm"
+              fontSize="sm"
+              color="fg"
+            >
+              {children}
+            </Box>
+          ),
+          pre: ({ children }) => (
+            <Box
+              as="pre"
+              bg="bg.muted"
+              p={4}
+              borderRadius="md"
+              overflowX="auto"
+              my={4}
+              fontSize="sm"
+            >
+              {children}
+            </Box>
+          ),
+          table: ({ children }) => (
+            <Box overflowX="auto" my={4}>
+              <Box as="table" width="100%" borderWidth="1px" borderColor="border">
+                {children}
+              </Box>
+            </Box>
+          ),
+          th: ({ children }) => (
+            <Box
+              as="th"
+              bg="bg.muted"
+              p={2}
+              borderWidth="1px"
+              borderColor="border"
+              fontWeight="bold"
+              textAlign="left"
+              color="fg"
+            >
+              {children}
+            </Box>
+          ),
+          td: ({ children }) => (
+            <Box
+              as="td"
+              p={2}
+              borderWidth="1px"
+              borderColor="border"
+              color="fg"
+            >
+              {children}
+            </Box>
           )
         }}
       >
         {processedContent}
       </ReactMarkdown>
-      <p style={{ marginTop: '2rem', paddingTop: '1rem', borderTop: '1px solid #eee' }}>
-        <Link to="/" style={{ color: '#0066cc', textDecoration: 'none' }}>← Back to search</Link>
-      </p>
-    </div>
+      
+      <Box mt={8} pt={6} borderTop="1px" borderColor="border">
+        <ChakraLink asChild color="blue.400" _hover={{ textDecoration: 'none' }}>
+          <Link to="/">
+            <HStack>
+              <LuArrowLeft />
+              <Text>Back to search</Text>
+            </HStack>
+          </Link>
+        </ChakraLink>
+      </Box>
+    </Container>
   );
 }
