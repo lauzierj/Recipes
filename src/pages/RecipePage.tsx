@@ -1,7 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link as RouterLink } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import {
+  Container,
+  Link,
+  Text,
+  Box,
+  Heading,
+  Image,
+  List,
+  ListItem,
+  Spinner,
+  Center,
+} from '@chakra-ui/react';
 
 interface Recipe {
   title: string;
@@ -25,7 +37,11 @@ export default function RecipePage() {
   }, [slug]);
 
   if (!recipe) {
-    return <div>Loading...</div>;
+    return (
+      <Center h="100vh">
+        <Spinner size="xl" color="blue.400" />
+      </Center>
+    );
   }
 
   // Process image URLs in content for recipepackage images
@@ -40,67 +56,131 @@ export default function RecipePage() {
   );
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
-      <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
-        components={{
-          h1: ({ children }) => (
-            <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>{children}</h1>
-          ),
-          blockquote: ({ children }) => (
-            <blockquote style={{
-              borderLeft: '4px solid #ccc',
-              paddingLeft: '1rem',
-              marginLeft: 0,
-              fontStyle: 'italic',
-              color: '#666'
-            }}>
-              {children}
-            </blockquote>
-          ),
-          img: ({ src, alt }) => (
-            <img
-              src={src}
-              alt={alt}
-              style={{
-                maxWidth: '100%',
-                height: 'auto',
-                borderRadius: '8px',
-                margin: '1rem 0'
-              }}
-            />
-          ),
-          a: ({ href, children }) => {
-            // Check if this is a hashtag link
-            if (href?.startsWith('#') && typeof children === 'string' && children.startsWith('#')) {
-              const tag = children.substring(1);
+    <Container maxW="container.md" py={8}>
+      <Box color="gray.100">
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          components={{
+            h1: ({ children }) => (
+              <Heading as="h1" size="2xl" mb={6} color="gray.100">
+                {children}
+              </Heading>
+            ),
+            h2: ({ children }) => (
+              <Heading as="h2" size="xl" mt={8} mb={4} color="gray.200">
+                {children}
+              </Heading>
+            ),
+            h3: ({ children }) => (
+              <Heading as="h3" size="lg" mt={6} mb={3} color="gray.200">
+                {children}
+              </Heading>
+            ),
+            blockquote: ({ children }) => (
+              <Box
+                as="blockquote"
+                borderLeft="4px"
+                borderColor="gray.600"
+                pl={4}
+                ml={0}
+                fontStyle="italic"
+                color="gray.400"
+                my={4}
+              >
+                {children}
+              </Box>
+            ),
+            img: ({ src, alt }) => (
+              <Image
+                src={src}
+                alt={alt}
+                maxW="100%"
+                h="auto"
+                borderRadius="lg"
+                my={4}
+              />
+            ),
+            a: ({ href, children }) => {
+              // Check if this is a hashtag link
+              if (href?.startsWith('#') && typeof children === 'string' && children.startsWith('#')) {
+                const tag = children.substring(1);
+                return (
+                  <Link
+                    as={RouterLink}
+                    to={`/?tag=${encodeURIComponent(tag)}`}
+                    color="blue.400"
+                    _hover={{ color: 'blue.300' }}
+                  >
+                    {children}
+                  </Link>
+                );
+              }
               return (
-                <Link
-                  to={`/?tag=${encodeURIComponent(tag)}`}
-                  style={{ color: '#0066cc', textDecoration: 'none' }}
-                >
+                <Link href={href} color="blue.400" _hover={{ color: 'blue.300' }}>
                   {children}
                 </Link>
               );
-            }
-            return <a href={href} style={{ color: '#0066cc' }}>{children}</a>;
-          },
-          ul: ({ children }) => (
-            <ul style={{ marginLeft: '1.5rem', marginBottom: '1rem' }}>{children}</ul>
-          ),
-          li: ({ children }) => (
-            <li style={{ marginBottom: '0.5rem' }}>{children}</li>
-          ),
-          p: ({ children }) => (
-            <p style={{ lineHeight: '1.6', marginBottom: '1rem' }}>{children}</p>
-          )
-        }}
+            },
+            ul: ({ children }) => (
+              <List as="ul" ml={6} mb={4} spacing={2} color="gray.300">
+                {children}
+              </List>
+            ),
+            li: ({ children }) => (
+              <ListItem>{children}</ListItem>
+            ),
+            p: ({ children }) => (
+              <Text lineHeight="tall" mb={4} color="gray.300">
+                {children}
+              </Text>
+            ),
+            hr: () => <Box as="hr" my={6} borderTop="1px solid" borderColor="gray.700" />,
+            code: ({ children, className }) => {
+              const isInline = !className;
+              return isInline ? (
+                <Text
+                  as="code"
+                  px={1}
+                  py={0.5}
+                  bg="gray.800"
+                  borderRadius="sm"
+                  fontSize="sm"
+                  color="blue.300"
+                >
+                  {children}
+                </Text>
+              ) : (
+                <Box
+                  as="pre"
+                  p={4}
+                  bg="gray.800"
+                  borderRadius="md"
+                  overflowX="auto"
+                  my={4}
+                >
+                  <Text as="code" fontSize="sm" color="gray.300">
+                    {children}
+                  </Text>
+                </Box>
+              );
+            },
+          }}
+        >
+          {processedContent}
+        </ReactMarkdown>
+      </Box>
+      
+      <Box as="hr" my={8} borderTop="1px solid" borderColor="gray.700" />
+      
+      <Link
+        as={RouterLink}
+        to="/"
+        color="blue.400"
+        _hover={{ color: 'blue.300', textDecoration: 'none' }}
+        fontSize="lg"
       >
-        {processedContent}
-      </ReactMarkdown>
-      <p style={{ marginTop: '2rem', paddingTop: '1rem', borderTop: '1px solid #eee' }}>
-        <Link to="/" style={{ color: '#0066cc', textDecoration: 'none' }}>← Back to search</Link>
-      </p>
-    </div>
+        ← Back to search
+      </Link>
+    </Container>
   );
 }
