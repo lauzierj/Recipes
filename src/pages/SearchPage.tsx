@@ -138,7 +138,7 @@ export default function SearchPage() {
                       size="sm"
                       variant="subtle"
                       bg="gray.700"
-                      color="gray.300"
+                      color="gray.100"
                     >
                       #{tag}
                     </Badge>
