@@ -12,6 +12,7 @@ import {
   // ListItem,
   Spinner,
   Center,
+  Link,
 } from '@chakra-ui/react';
 
 interface Recipe {
@@ -104,7 +105,7 @@ export default function RecipePage() {
               if (href?.startsWith('#') && typeof children === 'string' && children.startsWith('#')) {
                 const tag = children.substring(1);
                 return (
-                  <Box
+                  <Link
                     as={RouterLink}
                     to={`/?tag=${encodeURIComponent(tag)}`}
                     color="blue.400"
@@ -112,19 +113,18 @@ export default function RecipePage() {
                     display="inline"
                   >
                     {children}
-                  </Box>
+                  </Link>
                 );
               }
               return (
-                <Box
-                  as="a"
+                <Link
                   href={href}
                   color="blue.400"
                   _hover={{ color: 'blue.300' }}
                   display="inline"
                 >
                   {children}
-                </Box>
+                </Link>
               );
             },
             ul: ({ children }) => (
@@ -178,7 +178,7 @@ export default function RecipePage() {
       
       <Box as="hr" my={8} borderTop="1px solid" borderColor="gray.700" />
       
-      <Box
+      <Link
         as={RouterLink}
         to="/"
         color="blue.400"
@@ -187,7 +187,7 @@ export default function RecipePage() {
         display="inline-block"
       >
         ← Back to search
-      </Box>
+      </Link>
     </Container>
   );
 }

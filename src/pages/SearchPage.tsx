@@ -10,12 +10,13 @@ import {
   VStack,
   // List,
   // ListItem,
-  Tag,
+  Badge,
   Text,
   // Alert,
   Flex,
   Wrap,
   WrapItem,
+  Link,
 } from '@chakra-ui/react';
 
 interface Recipe {
@@ -53,7 +54,7 @@ export default function SearchPage() {
 
   return (
     <Container maxW="container.md" py={8}>
-      <VStack spacing={6} align="stretch">
+      <VStack gap={6} align="stretch">
         <Heading size="2xl" color="gray.100">Recipes</Heading>
         
         <Input
@@ -70,7 +71,7 @@ export default function SearchPage() {
 
         <Box>
           <Text fontWeight="bold" mb={3} color="gray.300">Filter by tag:</Text>
-          <Wrap spacing={2}>
+          <Wrap gap={2}>
             <WrapItem>
               <Button
                 size="sm"
@@ -118,7 +119,7 @@ export default function SearchPage() {
               _hover={{ bg: 'gray.800' }}
               transition="background-color 0.2s"
             >
-              <Box
+              <Link
                 as={RouterLink}
                 to={`/recipe/${r.slug}`}
                 fontSize="lg"
@@ -128,11 +129,11 @@ export default function SearchPage() {
                 display="inline-block"
               >
                 {r.title}
-              </Box>
+              </Link>
               {r.tags.length > 0 && (
                 <Flex mt={2} gap={2} flexWrap="wrap">
                   {r.tags.map(tag => (
-                    <Tag
+                    <Badge
                       key={tag}
                       size="sm"
                       variant="subtle"
@@ -140,7 +141,7 @@ export default function SearchPage() {
                       color="gray.300"
                     >
                       #{tag}
-                    </Tag>
+                    </Badge>
                   ))}
                 </Flex>
               )}
