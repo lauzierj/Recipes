@@ -8,12 +8,11 @@ import {
   Button,
   HStack,
   VStack,
-  List,
-  ListItem,
-  Link,
+  // List,
+  // ListItem,
   Tag,
   Text,
-  Alert,
+  // Alert,
   Flex,
   Wrap,
   WrapItem,
@@ -102,16 +101,16 @@ export default function SearchPage() {
         </Box>
 
         {tagFilter && (
-          <Alert status="info" bg="gray.800" borderRadius="md">
+          <Box bg="gray.800" borderRadius="md" p={4}>
             <Text>
               Showing recipes tagged with <Text as="span" fontWeight="bold">#{tagFilter}</Text>
             </Text>
-          </Alert>
+          </Box>
         )}
 
-        <List spacing={0}>
+        <Box>
           {filtered.map(r => (
-            <ListItem
+            <Box
               key={r.slug}
               p={4}
               borderBottom="1px"
@@ -119,16 +118,17 @@ export default function SearchPage() {
               _hover={{ bg: 'gray.800' }}
               transition="background-color 0.2s"
             >
-              <Link
+              <Box
                 as={RouterLink}
                 to={`/recipe/${r.slug}`}
                 fontSize="lg"
                 fontWeight="medium"
                 color="blue.400"
                 _hover={{ color: 'blue.300', textDecoration: 'none' }}
+                display="inline-block"
               >
                 {r.title}
-              </Link>
+              </Box>
               {r.tags.length > 0 && (
                 <Flex mt={2} gap={2} flexWrap="wrap">
                   {r.tags.map(tag => (
@@ -144,9 +144,9 @@ export default function SearchPage() {
                   ))}
                 </Flex>
               )}
-            </ListItem>
+            </Box>
           ))}
-        </List>
+        </Box>
       </VStack>
     </Container>
   );
