@@ -4,13 +4,12 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import {
   Container,
-  Link,
   Text,
   Box,
   Heading,
   Image,
-  List,
-  ListItem,
+  // List,
+  // ListItem,
   Spinner,
   Center,
 } from '@chakra-ui/react';
@@ -105,29 +104,36 @@ export default function RecipePage() {
               if (href?.startsWith('#') && typeof children === 'string' && children.startsWith('#')) {
                 const tag = children.substring(1);
                 return (
-                  <Link
+                  <Box
                     as={RouterLink}
                     to={`/?tag=${encodeURIComponent(tag)}`}
                     color="blue.400"
                     _hover={{ color: 'blue.300' }}
+                    display="inline"
                   >
                     {children}
-                  </Link>
+                  </Box>
                 );
               }
               return (
-                <Link href={href} color="blue.400" _hover={{ color: 'blue.300' }}>
+                <Box
+                  as="a"
+                  href={href}
+                  color="blue.400"
+                  _hover={{ color: 'blue.300' }}
+                  display="inline"
+                >
                   {children}
-                </Link>
+                </Box>
               );
             },
             ul: ({ children }) => (
-              <List as="ul" ml={6} mb={4} spacing={2} color="gray.300">
+              <Box as="ul" ml={6} mb={4} color="gray.300">
                 {children}
-              </List>
+              </Box>
             ),
             li: ({ children }) => (
-              <ListItem>{children}</ListItem>
+              <Box as="li">{children}</Box>
             ),
             p: ({ children }) => (
               <Text lineHeight="tall" mb={4} color="gray.300">
@@ -172,15 +178,16 @@ export default function RecipePage() {
       
       <Box as="hr" my={8} borderTop="1px solid" borderColor="gray.700" />
       
-      <Link
+      <Box
         as={RouterLink}
         to="/"
         color="blue.400"
         _hover={{ color: 'blue.300', textDecoration: 'none' }}
         fontSize="lg"
+        display="inline-block"
       >
         ← Back to search
-      </Link>
+      </Box>
     </Container>
   );
 }

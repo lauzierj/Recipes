@@ -3,9 +3,11 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
+    "dev": "vite",
     "prebuild": "node scripts/build-data.mjs",
     "build": "vite build",
-    "postbuild": "cp dist/index.html dist/404.html && node scripts/copy-images.mjs"
+    "postbuild": "cp dist/index.html dist/404.html && node scripts/copy-images.mjs",
+    "preview": "vite preview"
   },
   "dependencies": {
     "@chakra-ui/react": "^3.26.0",
