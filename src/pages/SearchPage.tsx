@@ -14,8 +14,6 @@ import {
   Text,
   // Alert,
   Flex,
-  Wrap,
-  WrapItem,
   Link,
 } from '@chakra-ui/react';
 
@@ -88,34 +86,59 @@ export default function SearchPage() {
 
         <Box>
           <Text fontWeight="bold" mb={3} color="gray.300">Filter by tag:</Text>
-          <Wrap gap={2}>
-            <WrapItem>
+          <Box
+            overflowX="auto"
+            whiteSpace="nowrap"
+            pb={2}
+            css={{
+              '&::-webkit-scrollbar': {
+                height: '6px',
+              },
+              '&::-webkit-scrollbar-track': {
+                background: 'transparent',
+              },
+              '&::-webkit-scrollbar-thumb': {
+                background: 'var(--chakra-colors-gray-600)',
+                borderRadius: '4px',
+              },
+            }}
+          >
+            <HStack gap={2} display="inline-flex">
               <Button
                 size="sm"
                 variant={tagFilter === '' ? 'solid' : 'outline'}
-                colorScheme={tagFilter === '' ? 'blue' : 'gray'}
+                colorScheme={tagFilter === '' ? 'blue' : undefined}
                 onClick={() => setTagFilter('')}
                 borderColor="gray.600"
-                _hover={{ bg: tagFilter === '' ? 'blue.700' : 'gray.700' }}
+                color={tagFilter === '' ? 'white' : 'gray.200'}
+                bg={tagFilter === '' ? 'blue.600' : 'transparent'}
+                _hover={{ 
+                  bg: tagFilter === '' ? 'blue.700' : 'gray.700',
+                  color: 'white'
+                }}
               >
                 All
               </Button>
-            </WrapItem>
-            {tags.map(t => (
-              <WrapItem key={t}>
+              {tags.map(t => (
                 <Button
+                  key={t}
                   size="sm"
                   variant={tagFilter === t ? 'solid' : 'outline'}
-                  colorScheme={tagFilter === t ? 'blue' : 'gray'}
+                  colorScheme={tagFilter === t ? 'blue' : undefined}
                   onClick={() => setTagFilter(t)}
                   borderColor="gray.600"
-                  _hover={{ bg: tagFilter === t ? 'blue.700' : 'gray.700' }}
+                  color={tagFilter === t ? 'white' : 'gray.200'}
+                  bg={tagFilter === t ? 'blue.600' : 'transparent'}
+                  _hover={{ 
+                    bg: tagFilter === t ? 'blue.700' : 'gray.700',
+                    color: 'white'
+                  }}
                 >
                   #{t}
                 </Button>
-              </WrapItem>
-            ))}
-          </Wrap>
+              ))}
+            </HStack>
+          </Box>
         </Box>
 
         {tagFilter && (
