@@ -24,6 +24,7 @@ interface Recipe {
   slug: string;
   tags: string[];
   content: string;
+  description?: string;
 }
 
 export default function SearchPage() {
@@ -35,7 +36,23 @@ export default function SearchPage() {
 
   useEffect(() => {
     const base = import.meta.env.BASE_URL;
-    fetch(`${base}recipes.json`).then(r => r.json()).then(setRecipes);
+    fetch(`${base}recipes.json`)
+      .then(r => r.json())
+      .then((data: Recipe[]) => {
+        // Extract description from content (the blockquote after the title)
+        const recipesWithDescription = data.map(recipe => {
+          const lines = recipe.content.split('\n');
+          let description = '';
+          for (let i = 1; i < lines.length; i++) {
+            if (lines[i].startsWith('>')) {
+              description = lines[i].substring(1).trim().replace(/#\w+\s*/g, '').trim();
+              break;
+            }
+          }
+          return { ...recipe, description };
+        });
+        setRecipes(recipesWithDescription);
+      });
     fetch(`${base}tags.json`).then(r => r.json()).then(setTags);
   }, []);
 
@@ -109,45 +126,80 @@ export default function SearchPage() {
           </Box>
         )}
 
-        <Box>
+        <VStack align="stretch" gap={0}>
           {filtered.map(r => (
             <Box
               key={r.slug}
+              as={RouterLink}
+              to={`/recipe/${r.slug}`}
               p={4}
               borderBottom="1px"
               borderColor="gray.700"
-              _hover={{ bg: 'gray.800' }}
+              _hover={{ bg: 'gray.800', textDecoration: 'none' }}
               transition="background-color 0.2s"
+              cursor="pointer"
+              display="block"
             >
-              <Link
-                as={RouterLink}
-                to={`/recipe/${r.slug}`}
+              <Text
                 fontSize="lg"
                 fontWeight="medium"
                 color="blue.400"
-                _hover={{ color: 'blue.300', textDecoration: 'none' }}
-                display="inline-block"
+                mb={1}
               >
                 {r.title}
-              </Link>
+              </Text>
+              {r.description && (
+                <Text
+                  fontSize="sm"
+                  color="gray.400"
+                  mb={2}
+                  noOfLines={2}
+                >
+                  {r.description}
+                </Text>
+              )}
               {r.tags.length > 0 && (
-                <Flex mt={2} gap={2} flexWrap="wrap">
-                  {r.tags.map(tag => (
-                    <Badge
-                      key={tag}
-                      size="sm"
-                      variant="subtle"
-                      bg="gray.700"
-                      color="gray.100"
-                    >
-                      #{tag}
-                    </Badge>
-                  ))}
-                </Flex>
+                <Box
+                  overflowX="auto"
+                  whiteSpace="nowrap"
+                  css={{
+                    '&::-webkit-scrollbar': {
+                      height: '4px',
+                    },
+                    '&::-webkit-scrollbar-track': {
+                      background: 'transparent',
+                    },
+                    '&::-webkit-scrollbar-thumb': {
+                      background: 'var(--chakra-colors-gray-600)',
+                      borderRadius: '4px',
+                    },
+                  }}
+                >
+                  <HStack gap={2} display="inline-flex">
+                    {r.tags.map(tag => (
+                      <Badge
+                        key={tag}
+                        size="sm"
+                        variant="subtle"
+                        bg="gray.700"
+                        color="gray.300"
+                        cursor="pointer"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setTagFilter(tag);
+                        }}
+                        _hover={{ bg: 'gray.600', color: 'gray.200' }}
+                      >
+                        #{tag}
+                      </Badge>
+                    ))}
+                  </HStack>
+                </Box>
               )}
             </Box>
           ))}
-        </Box>
+        </VStack>
       </VStack>
     </Container>
   );
