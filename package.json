@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "prebuild": "node scripts/build-data.mjs",
+    "prebuild": "node scripts/build-data.mjs && node scripts/generate-build-info.mjs",
     "build": "vite build",
     "postbuild": "cp dist/index.html dist/404.html && node scripts/copy-images.mjs",
     "preview": "vite preview"
