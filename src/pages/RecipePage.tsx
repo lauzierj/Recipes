@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link as RouterLink } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -13,13 +13,8 @@ import {
   Spinner,
   Center,
   Link,
-  Button,
-  Checkbox,
-  HStack,
   VStack,
-  Icon,
 } from '@chakra-ui/react';
-import { FiClock, FiX, FiCheckCircle, FiAlertCircle, FiInfo } from 'react-icons/fi';
 
 interface Recipe {
   title: string;
@@ -32,10 +27,6 @@ interface Recipe {
 export default function RecipePage() {
   const { slug } = useParams();
   const [recipe, setRecipe] = useState<Recipe | null>(null);
-  const [cookingMode, setCookingMode] = useState(false);
-  const [checkedItems, setCheckedItems] = useState<Set<string>>(new Set());
-  const wakeLockRef = useRef<WakeLockSentinel | null>(null);
-  const [alertMessage, setAlertMessage] = useState<{ text: string; status: 'success' | 'warning' | 'info' } | null>(null);
 
   useEffect(() => {
     const base = import.meta.env.BASE_URL;
@@ -46,76 +37,7 @@ export default function RecipePage() {
       });
   }, [slug]);
 
-  const requestWakeLock = useCallback(async () => {
-    try {
-      if ('wakeLock' in navigator) {
-        wakeLockRef.current = await navigator.wakeLock.request('screen');
-        wakeLockRef.current.addEventListener('release', () => {
-          console.log('Wake Lock was released');
-        });
-        console.log('Wake Lock is active');
-        return true;
-      } else {
-        setAlertMessage({
-          text: 'Screen lock prevention not supported. Keep your device active manually.',
-          status: 'warning',
-        });
-        setTimeout(() => setAlertMessage(null), 5000);
-        return false;
-      }
-    } catch (err) {
-      console.error('Wake Lock error:', err);
-      return false;
-    }
-  }, []);
 
-  const releaseWakeLock = useCallback(async () => {
-    if (wakeLockRef.current) {
-      await wakeLockRef.current.release();
-      wakeLockRef.current = null;
-    }
-  }, []);
-
-  const toggleCookingMode = useCallback(async () => {
-    if (!cookingMode) {
-      const wakeLockSuccess = await requestWakeLock();
-      setCookingMode(true);
-      setAlertMessage({
-        text: wakeLockSuccess 
-          ? 'Cooking Mode Activated! Screen will stay awake. Check off ingredients and steps as you go!'
-          : 'Cooking Mode Activated! Note: Screen lock prevention is not available.',
-        status: wakeLockSuccess ? 'success' : 'warning',
-      });
-      setTimeout(() => setAlertMessage(null), 3000);
-    } else {
-      await releaseWakeLock();
-      setCookingMode(false);
-      setCheckedItems(new Set());
-      setAlertMessage({
-        text: 'Cooking Mode Deactivated',
-        status: 'info',
-      });
-      setTimeout(() => setAlertMessage(null), 2000);
-    }
-  }, [cookingMode, requestWakeLock, releaseWakeLock]);
-
-  useEffect(() => {
-    return () => {
-      releaseWakeLock();
-    };
-  }, [releaseWakeLock]);
-
-  const toggleCheck = useCallback((itemId: string) => {
-    setCheckedItems(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(itemId)) {
-        newSet.delete(itemId);
-      } else {
-        newSet.add(itemId);
-      }
-      return newSet;
-    });
-  }, []);
 
   if (!recipe) {
     return (
@@ -138,38 +60,6 @@ export default function RecipePage() {
 
   return (
     <Container maxW="container.md" py={8}>
-      <VStack spacing={4} align="stretch" mb={6}>
-        <HStack justify="space-between">
-          <Button
-            onClick={toggleCookingMode}
-            colorScheme={cookingMode ? 'red' : 'green'}
-            leftIcon={<Icon as={cookingMode ? FiX : FiClock} />}
-            size="lg"
-          >
-            {cookingMode ? 'Exit Cooking Mode' : 'Start Cooking Mode'}
-          </Button>
-        </HStack>
-        
-        {alertMessage && (
-          <Box
-            p={4}
-            borderRadius="md"
-            bg={alertMessage.status === 'success' ? 'green.900' : alertMessage.status === 'warning' ? 'yellow.900' : 'blue.900'}
-            borderLeft="4px solid"
-            borderLeftColor={alertMessage.status === 'success' ? 'green.500' : alertMessage.status === 'warning' ? 'yellow.500' : 'blue.500'}
-          >
-            <HStack spacing={3}>
-              <Icon
-                as={alertMessage.status === 'success' ? FiCheckCircle : alertMessage.status === 'warning' ? FiAlertCircle : FiInfo}
-                color={alertMessage.status === 'success' ? 'green.500' : alertMessage.status === 'warning' ? 'yellow.500' : 'blue.500'}
-                boxSize={5}
-              />
-              <Text color="gray.100">{alertMessage.text}</Text>
-            </HStack>
-          </Box>
-        )}
-      </VStack>
-
       <Box color="gray.100">
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
@@ -248,68 +138,9 @@ export default function RecipePage() {
               );
             },
             li: ({ children }) => {
-              // Check if this is an ingredient line (format: "Ingredient | Details | Notes")
-              const childText = typeof children === 'string' ? children : 
-                               children && typeof children === 'object' && 'props' in children && 
-                               typeof children.props?.children === 'string' ? children.props.children : '';
-              
-              const isIngredientLine = childText && childText.includes(' | ');
-              
-              if (isIngredientLine && cookingMode) {
-                // Parse the ingredient format
-                const parts = childText.split(' | ').map(p => p.trim());
-                const ingredientName = parts[0] || '';
-                const details = parts[1] || '';
-                const itemId = `ingredient-${ingredientName.replace(/\s+/g, '-').toLowerCase()}`;
-                
-                return (
-                  <HStack 
-                    as="li" 
-                    spacing={3} 
-                    mb={3}
-                    onClick={() => toggleCheck(itemId)}
-                    cursor="pointer"
-                    opacity={checkedItems.has(itemId) ? 0.5 : 1}
-                    transition="opacity 0.2s"
-                  >
-                    <Checkbox
-                      isChecked={checkedItems.has(itemId)}
-                      onChange={() => toggleCheck(itemId)}
-                      size="lg"
-                      colorScheme="yellow"
-                      borderColor="yellow.500"
-                      sx={{
-                        '& .chakra-checkbox__control': {
-                          borderRadius: '50%',
-                          borderWidth: '2px',
-                          borderColor: 'yellow.500',
-                          bg: 'transparent',
-                          _checked: {
-                            bg: 'yellow.500',
-                            borderColor: 'yellow.500',
-                            color: 'gray.900',
-                          },
-                          _focus: {
-                            boxShadow: 'none',
-                          },
-                        },
-                      }}
-                    />
-                    <VStack align="start" spacing={0}>
-                      <Text color="gray.100" fontWeight="medium" fontSize="md">
-                        {ingredientName}
-                      </Text>
-                      {details && (
-                        <Text color="gray.500" fontSize="sm">
-                          {details}
-                        </Text>
-                      )}
-                    </VStack>
-                  </HStack>
-                );
-              } else if (isIngredientLine) {
-                // Non-cooking mode: display ingredients with improved styling
-                const parts = childText.split(' | ').map(p => p.trim());
+              // Check if this is a simple string that looks like an ingredient
+              if (typeof children === 'string' && children.includes(' | ')) {
+                const parts = children.split(' | ').map(p => p.trim());
                 const ingredientName = parts[0] || '';
                 const details = parts[1] || '';
                 
