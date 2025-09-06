@@ -248,6 +248,88 @@ export default function RecipePage() {
               );
             },
             li: ({ children }) => {
+              // Check if this is an ingredient line (format: "Ingredient | Details | Notes")
+              const childText = typeof children === 'string' ? children : 
+                               children && typeof children === 'object' && 'props' in children && 
+                               typeof children.props?.children === 'string' ? children.props.children : '';
+              
+              const isIngredientLine = childText && childText.includes(' | ');
+              
+              if (isIngredientLine && cookingMode) {
+                // Parse the ingredient format
+                const parts = childText.split(' | ').map(p => p.trim());
+                const ingredientName = parts[0] || '';
+                const details = parts[1] || '';
+                const itemId = `ingredient-${ingredientName.replace(/\s+/g, '-').toLowerCase()}`;
+                
+                return (
+                  <HStack 
+                    as="li" 
+                    spacing={3} 
+                    mb={3}
+                    onClick={() => toggleCheck(itemId)}
+                    cursor="pointer"
+                    opacity={checkedItems.has(itemId) ? 0.5 : 1}
+                    transition="opacity 0.2s"
+                  >
+                    <Checkbox
+                      isChecked={checkedItems.has(itemId)}
+                      onChange={() => toggleCheck(itemId)}
+                      size="lg"
+                      colorScheme="yellow"
+                      borderColor="yellow.500"
+                      sx={{
+                        '& .chakra-checkbox__control': {
+                          borderRadius: '50%',
+                          borderWidth: '2px',
+                          borderColor: 'yellow.500',
+                          bg: 'transparent',
+                          _checked: {
+                            bg: 'yellow.500',
+                            borderColor: 'yellow.500',
+                            color: 'gray.900',
+                          },
+                          _focus: {
+                            boxShadow: 'none',
+                          },
+                        },
+                      }}
+                    />
+                    <VStack align="start" spacing={0}>
+                      <Text color="gray.100" fontWeight="medium" fontSize="md">
+                        {ingredientName}
+                      </Text>
+                      {details && (
+                        <Text color="gray.500" fontSize="sm">
+                          {details}
+                        </Text>
+                      )}
+                    </VStack>
+                  </HStack>
+                );
+              } else if (isIngredientLine) {
+                // Non-cooking mode: display ingredients with improved styling
+                const parts = childText.split(' | ').map(p => p.trim());
+                const ingredientName = parts[0] || '';
+                const details = parts[1] || '';
+                
+                return (
+                  <Box as="li" mb={2}>
+                    <VStack align="start" spacing={0}>
+                      <Text color="gray.100" fontWeight="medium" fontSize="md">
+                        {ingredientName}
+                      </Text>
+                      {details && (
+                        <Text color="gray.500" fontSize="sm">
+                          {details}
+                        </Text>
+                      )}
+                    </VStack>
+                  </Box>
+                );
+              }
+              
+              // Regular list item
               return (
                 <Box as="li">{children}</Box>
               );
