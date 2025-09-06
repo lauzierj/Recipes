@@ -136,9 +136,6 @@ export default function RecipePage() {
     }
   );
 
-  let stepCounter = 0;
-  let ingredientCounter = 0;
-
   return (
     <Container maxW="container.md" py={8}>
       <VStack spacing={4} align="stretch" mb={6}>
@@ -244,26 +241,6 @@ export default function RecipePage() {
               );
             },
             ul: ({ children }) => {
-              // Check if this is an ingredients list (contains pipes)
-              const childrenArray = React.Children.toArray(children);
-              const isIngredientsList = childrenArray.some(child => {
-                if (React.isValidElement(child) && child.props?.children) {
-                  const text = React.Children.toArray(child.props.children)
-                    .map(c => typeof c === 'string' ? c : '')
-                    .join('');
-                  return text.includes('|');
-                }
-                return false;
-              });
-
-              if (isIngredientsList && cookingMode) {
-                return (
-                  <VStack align="stretch" spacing={2} mb={4}>
-                    {children}
-                  </VStack>
-                );
-              }
-              
               return (
                 <Box as="ul" ml={6} mb={4} color="gray.300">
                   {children}
@@ -271,108 +248,11 @@ export default function RecipePage() {
               );
             },
             li: ({ children }) => {
-              // Extract text content
-              const textContent = React.Children.toArray(children)
-                .map(child => {
-                  if (typeof child === 'string') return child;
-                  if (React.isValidElement(child) && typeof child.props?.children === 'string') {
-                    return child.props.children;
-                  }
-                  return '';
-                })
-                .join('');
-
-              // Check if this is an ingredient (contains pipes)
-              const isIngredient = textContent.includes('|');
-              
-              if (cookingMode && isIngredient) {
-                const parts = textContent.split('|').map(p => p.trim());
-                const ingredientId = `ingredient-${ingredientCounter++}`;
-                const isChecked = checkedItems.has(ingredientId);
-                
-                return (
-                  <HStack 
-                    spacing={3} 
-                    opacity={isChecked ? 0.5 : 1}
-                    transition="opacity 0.3s"
-                    bg="gray.800"
-                    p={3}
-                    borderRadius="md"
-                    borderLeft="4px solid"
-                    borderLeftColor="blue.500"
-                  >
-                    <Checkbox
-                      isChecked={isChecked}
-                      onChange={() => toggleCheck(ingredientId)}
-                      colorScheme="green"
-                      size="lg"
-                    />
-                    <HStack flex={1} justify="space-between">
-                      <Text fontWeight="bold" color="gray.100">
-                        {parts[0]}
-                      </Text>
-                      <Text color="gray.400">
-                        {parts[1]}
-                      </Text>
-                      {parts[2] && (
-                        <Text fontSize="sm" color="gray.500">
-                          {parts[2]}
-                        </Text>
-                      )}
-                    </HStack>
-                  </HStack>
-                );
-              }
-
               return (
                 <Box as="li">{children}</Box>
               );
             },
             p: ({ children }) => {
-              // Check if this is an instruction step (not inside a blockquote or other special element)
-              const textContent = React.Children.toArray(children)
-                .map(child => {
-                  if (typeof child === 'string') return child;
-                  if (React.isValidElement(child) && typeof child.props?.children === 'string') {
-                    return child.props.children;
-                  }
-                  return '';
-                })
-                .join('');
-
-              // Simple heuristic: if it's a regular paragraph with substantial text and not a link/special content,
-              // treat it as a cooking step
-              const isStep = cookingMode && 
-                textContent.length > 20 && 
-                !textContent.startsWith('#') &&
-                !textContent.includes('|');
-
-              if (isStep) {
-                const stepId = `step-${stepCounter++}`;
-                const isChecked = checkedItems.has(stepId);
-                
-                return (
-                  <HStack 
-                    spacing={3} 
-                    opacity={isChecked ? 0.5 : 1}
-                    transition="opacity 0.3s"
-                    mb={4}
-                    align="start"
-                  >
-                    <Checkbox
-                      isChecked={isChecked}
-                      onChange={() => toggleCheck(stepId)}
-                      colorScheme="green"
-                      size="lg"
-                      mt={1}
-                    />
-                    <Text lineHeight="tall" color="gray.300" flex={1}>
-                      {children}
-                    </Text>
-                  </HStack>
-                );
-              }
-
               return (
                 <Text lineHeight="tall" mb={4} color="gray.300">
                   {children}
