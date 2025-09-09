@@ -70,22 +70,22 @@ export default function SearchPage() {
   return (
     <Container maxW="container.md" py={8}>
       <VStack gap={6} align="stretch">
-        <Heading size="2xl" color="gray.100">Recipes</Heading>
+        <Heading size="2xl" color="gray.900">Recipes</Heading>
         
         <Input
           placeholder="Search recipes..."
           value={query}
           onChange={e => setQuery(e.target.value)}
           size="lg"
-          bg="gray.800"
-          borderColor="gray.700"
-          _hover={{ borderColor: 'gray.600' }}
+          bg="white"
+          borderColor="gray.300"
+          _hover={{ borderColor: 'gray.400' }}
           _focus={{ borderColor: 'blue.500', boxShadow: '0 0 0 1px var(--chakra-colors-blue-500)' }}
-          _placeholder={{ color: 'gray.500' }}
+          _placeholder={{ color: 'gray.400' }}
         />
 
         <Box>
-          <Text fontWeight="bold" mb={3} color="gray.300">Filter by tag:</Text>
+          <Text fontWeight="bold" mb={3} color="gray.700">Filter by tag:</Text>
           <Box
             overflowX="auto"
             whiteSpace="nowrap"
@@ -98,7 +98,7 @@ export default function SearchPage() {
                 background: 'transparent',
               },
               '&::-webkit-scrollbar-thumb': {
-                background: 'var(--chakra-colors-gray-600)',
+                background: 'var(--chakra-colors-gray-300)',
                 borderRadius: '4px',
               },
             }}
@@ -109,11 +109,11 @@ export default function SearchPage() {
                 variant={tagFilter === '' ? 'solid' : 'outline'}
                 colorScheme={tagFilter === '' ? 'blue' : undefined}
                 onClick={() => setTagFilter('')}
-                borderColor="gray.600"
-                color={tagFilter === '' ? 'white' : 'gray.200'}
+                borderColor="gray.300"
+                color={tagFilter === '' ? 'white' : 'gray.700'}
                 bg={tagFilter === '' ? 'blue.600' : 'transparent'}
                 _hover={{ 
-                  bg: tagFilter === '' ? 'blue.700' : 'gray.700',
+                  bg: tagFilter === '' ? 'blue.700' : 'gray.100',
                   color: 'white'
                 }}
               >
@@ -126,11 +126,11 @@ export default function SearchPage() {
                   variant={tagFilter === t ? 'solid' : 'outline'}
                   colorScheme={tagFilter === t ? 'blue' : undefined}
                   onClick={() => setTagFilter(t)}
-                  borderColor="gray.600"
-                  color={tagFilter === t ? 'white' : 'gray.200'}
+                  borderColor="gray.300"
+                  color={tagFilter === t ? 'white' : 'gray.700'}
                   bg={tagFilter === t ? 'blue.600' : 'transparent'}
                   _hover={{ 
-                    bg: tagFilter === t ? 'blue.700' : 'gray.700',
+                    bg: tagFilter === t ? 'blue.700' : 'gray.100',
                     color: 'white'
                   }}
                 >
@@ -142,7 +142,7 @@ export default function SearchPage() {
         </Box>
 
         {tagFilter && (
-          <Box bg="gray.800" borderRadius="md" p={4}>
+          <Box bg="gray.100" borderRadius="md" p={4}>
             <Text>
               Showing recipes tagged with <Text as="span" fontWeight="bold">#{tagFilter}</Text>
             </Text>
@@ -157,8 +157,8 @@ export default function SearchPage() {
               to={`/recipe/${r.slug}`}
               p={4}
               borderBottom="1px"
-              borderColor="gray.700"
-              _hover={{ bg: 'gray.800', textDecoration: 'none' }}
+              borderColor="gray.200"
+              _hover={{ bg: 'gray.50', textDecoration: 'none' }}
               transition="background-color 0.2s"
               cursor="pointer"
               display="block"
@@ -166,7 +166,7 @@ export default function SearchPage() {
               <Text
                 fontSize="lg"
                 fontWeight="medium"
-                color="blue.400"
+                color="blue.600"
                 mb={1}
               >
                 {r.title}
@@ -174,7 +174,7 @@ export default function SearchPage() {
               {r.description && (
                 <Text
                   fontSize="sm"
-                  color="gray.400"
+                  color="gray.600"
                   mb={2}
                   noOfLines={2}
                 >
@@ -193,7 +193,7 @@ export default function SearchPage() {
                       background: 'transparent',
                     },
                     '&::-webkit-scrollbar-thumb': {
-                      background: 'var(--chakra-colors-gray-600)',
+                      background: 'var(--chakra-colors-gray-300)',
                       borderRadius: '4px',
                     },
                   }}
@@ -204,15 +204,15 @@ export default function SearchPage() {
                         key={tag}
                         size="sm"
                         variant="subtle"
-                        bg="gray.700"
-                        color="gray.300"
+                        bg="gray.200"
+                        color="gray.700"
                         cursor="pointer"
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
                           setTagFilter(tag);
                         }}
-                        _hover={{ bg: 'gray.600', color: 'gray.200' }}
+                        _hover={{ bg: 'gray.300', color: 'gray.800' }}
                       >
                         #{tag}
                       </Badge>

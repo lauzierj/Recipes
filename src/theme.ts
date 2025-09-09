@@ -21,8 +21,8 @@ const customConfig = defineConfig({
   },
   globalCss: {
     body: {
-      bg: 'gray.900',
-      color: 'gray.100',
+      bg: 'white',
+      color: 'gray.900',
     },
   },
 });
