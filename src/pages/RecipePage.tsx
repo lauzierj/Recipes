@@ -14,6 +14,8 @@ import {
   Center,
   Link,
   VStack,
+  Button,
+  HStack,
 } from '@chakra-ui/react';
 
 interface Recipe {
@@ -36,6 +38,27 @@ export default function RecipePage() {
         setRecipe(list.find(r => r.slug === slug) || null);
       });
   }, [slug]);
+
+  const downloadRecipe = () => {
+    if (!recipe) return;
+    
+    // Create a blob with the recipe content
+    const blob = new Blob([recipe.content], { type: 'text/markdown' });
+    
+    // Create a download link
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${recipe.title}.recipe`;
+    
+    // Trigger the download
+    document.body.appendChild(link);
+    link.click();
+    
+    // Clean up
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
 
 
 
@@ -210,16 +233,27 @@ export default function RecipePage() {
       
       <Box as="hr" my={8} borderTop="1px solid" borderColor="gray.700" />
       
-      <Link
-        as={RouterLink}
-        to="/"
-        color="blue.400"
-        _hover={{ color: 'blue.300', textDecoration: 'none' }}
-        fontSize="lg"
-        display="inline-block"
-      >
-        ← Back to search
-      </Link>
+      <HStack justify="space-between" align="center">
+        <Link
+          as={RouterLink}
+          to="/"
+          color="blue.400"
+          _hover={{ color: 'blue.300', textDecoration: 'none' }}
+          fontSize="lg"
+          display="inline-block"
+        >
+          ← Back to search
+        </Link>
+        
+        <Button
+          onClick={downloadRecipe}
+          colorScheme="blue"
+          size="sm"
+          variant="outline"
+        >
+          Download Recipe
+        </Button>
+      </HStack>
     </Container>
   );
 }
