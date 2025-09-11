@@ -31,6 +31,12 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
       - name: Run Claude Code Review
         id: claude-review
         uses: anthropics/claude-code-action@v1
@@ -43,8 +49,11 @@ jobs:
             - Performance considerations
             - Security concerns
             - Test coverage
+            - Browser functionality (build and run the application as needed, then use MCP Playwright tools for testing)
             
             Use the repository's CLAUDE.md for guidance on style and conventions. Be constructive and helpful in your feedback.
+
+            You have access to Playwright MCP tools for browser testing. Build and run the application yourself as needed during review.
 
             Use `gh pr comment` with your Bash tool to leave your review as a comment on the PR.
           
