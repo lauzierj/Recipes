@@ -250,6 +250,8 @@ export default function RecipePage() {
           colorScheme="blue"
           size="sm"
           variant="outline"
+          color="blue.400"
+          _hover={{ color: 'blue.300' }}
         >
           Download Recipe
         </Button>
