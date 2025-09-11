@@ -50,3 +50,23 @@ When implementing changes to the codebase:
      - How to test the changes
      - Links to relevant screenshots
    - Use relative links to reference screenshots and other documentation
+
+# Testing and Validation Requirements
+
+When implementing any functionality changes:
+
+1. **Build and Test Process**:
+   - Always build the project using the appropriate build command
+   - Launch the application locally to verify functionality
+   - Navigate through the browser to test affected features
+   - Take screenshots showing the changes in action
+
+2. **MCP Configuration**:
+   - Use the `mcp-config.json` file for Model Context Protocol configuration
+   - Reference in GitHub Actions with `--mcp-config mcp-config.json` in `claude_args`
+   - Includes Playwright MCP server for browser automation and testing
+
+3. **Documentation Evidence**:
+   - Screenshots must be uploaded to pull requests showing functionality
+   - Include both before/after states when modifying existing features
+   - Test evidence should demonstrate successful implementation
