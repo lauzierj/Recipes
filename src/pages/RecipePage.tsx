@@ -191,12 +191,14 @@ export default function RecipePage() {
                 <Box
                   as="pre"
                   p={4}
-                  bg="gray.900"
+                  bg="gray.100"
                   borderRadius="md"
                   overflowX="auto"
                   my={4}
+                  border="1px solid"
+                  borderColor="gray.300"
                 >
-                  <Text as="code" fontSize="sm" color="gray.100">
+                  <Text as="code" fontSize="sm" color="gray.800">
                     {children}
                   </Text>
                 </Box>
@@ -213,8 +215,8 @@ export default function RecipePage() {
       <Link
         as={RouterLink}
         to="/"
-        color="blue.400"
-        _hover={{ color: 'blue.300', textDecoration: 'none' }}
+        color="blue.600"
+        _hover={{ color: 'blue.700', textDecoration: 'none' }}
         fontSize="lg"
         display="inline-block"
       >

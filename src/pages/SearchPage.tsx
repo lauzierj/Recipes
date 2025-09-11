@@ -114,7 +114,7 @@ export default function SearchPage() {
                 bg={tagFilter === '' ? 'blue.600' : 'transparent'}
                 _hover={{ 
                   bg: tagFilter === '' ? 'blue.700' : 'gray.100',
-                  color: 'white'
+                  color: tagFilter === '' ? 'white' : 'gray.800'
                 }}
               >
                 All
@@ -131,7 +131,7 @@ export default function SearchPage() {
                   bg={tagFilter === t ? 'blue.600' : 'transparent'}
                   _hover={{ 
                     bg: tagFilter === t ? 'blue.700' : 'gray.100',
-                    color: 'white'
+                    color: tagFilter === t ? 'white' : 'gray.800'
                   }}
                 >
                   #{t}

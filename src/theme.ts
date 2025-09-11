@@ -16,6 +16,27 @@ const customConfig = defineConfig({
           800: { value: '#1a202c' },
           900: { value: '#171923' },
         },
+        // Semantic color tokens for better maintainability
+        primary: {
+          text: { value: '{colors.gray.900}' },
+          textSecondary: { value: '{colors.gray.700}' },
+          textSubtle: { value: '{colors.gray.600}' },
+          background: { value: 'white' },
+          backgroundSubtle: { value: '{colors.gray.50}' },
+          backgroundMuted: { value: '{colors.gray.100}' },
+          border: { value: '{colors.gray.300}' },
+          borderSubtle: { value: '{colors.gray.200}' },
+        },
+        link: {
+          default: { value: '{colors.blue.600}' },
+          hover: { value: '{colors.blue.700}' },
+        },
+        code: {
+          background: { value: '{colors.gray.100}' },
+          text: { value: '{colors.blue.700}' },
+          blockText: { value: '{colors.gray.800}' },
+          blockBorder: { value: '{colors.gray.300}' },
+        },
       },
     },
   },
