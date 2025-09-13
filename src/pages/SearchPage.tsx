@@ -31,6 +31,7 @@ export default function SearchPage() {
   const [tags, setTags] = useState<string[]>([]);
   const [query, setQuery] = useState(searchParams.get('q') || '');
   const [tagFilter, setTagFilter] = useState(searchParams.get('tag') || '');
+  const [showAllTags, setShowAllTags] = useState(false);
 
   useEffect(() => {
     const base = import.meta.env.BASE_URL;
@@ -50,8 +51,21 @@ export default function SearchPage() {
           return { ...recipe, description };
         });
         setRecipes(recipesWithDescription);
+        
+        // Calculate tag frequencies and sort by frequency
+        const tagFrequency = new Map<string, number>();
+        data.forEach(recipe => {
+          recipe.tags.forEach(tag => {
+            tagFrequency.set(tag, (tagFrequency.get(tag) || 0) + 1);
+          });
+        });
+        
+        // Sort tags by frequency (descending)
+        const sortedTags = Array.from(tagFrequency.keys()).sort((a, b) => 
+          (tagFrequency.get(b) || 0) - (tagFrequency.get(a) || 0)
+        );
+        setTags(sortedTags);
       });
-    fetch(`${base}tags.json`).then(r => r.json()).then(setTags);
   }, []);
 
   useEffect(() => {
@@ -86,59 +100,58 @@ export default function SearchPage() {
 
         <Box>
           <Text fontWeight="bold" mb={3} color="gray.300">Filter by tag:</Text>
-          <Box
-            overflowX="auto"
-            whiteSpace="nowrap"
-            pb={2}
-            css={{
-              '&::-webkit-scrollbar': {
-                height: '6px',
-              },
-              '&::-webkit-scrollbar-track': {
-                background: 'transparent',
-              },
-              '&::-webkit-scrollbar-thumb': {
-                background: 'var(--chakra-colors-gray-600)',
-                borderRadius: '4px',
-              },
-            }}
+          <Flex
+            flexWrap="wrap"
+            gap={2}
+            maxH={showAllTags ? 'none' : '76px'}
+            overflow="hidden"
+            position="relative"
           >
-            <HStack gap={2} display="inline-flex">
+            <Button
+              size="sm"
+              variant={tagFilter === '' ? 'solid' : 'outline'}
+              colorScheme={tagFilter === '' ? 'blue' : undefined}
+              onClick={() => setTagFilter('')}
+              borderColor="gray.600"
+              color={tagFilter === '' ? 'white' : 'gray.200'}
+              bg={tagFilter === '' ? 'blue.600' : 'transparent'}
+              _hover={{ 
+                bg: tagFilter === '' ? 'blue.700' : 'gray.700',
+                color: 'white'
+              }}
+            >
+              All
+            </Button>
+            {tags.map(t => (
               <Button
+                key={t}
                 size="sm"
-                variant={tagFilter === '' ? 'solid' : 'outline'}
-                colorScheme={tagFilter === '' ? 'blue' : undefined}
-                onClick={() => setTagFilter('')}
+                variant={tagFilter === t ? 'solid' : 'outline'}
+                colorScheme={tagFilter === t ? 'blue' : undefined}
+                onClick={() => setTagFilter(t)}
                 borderColor="gray.600"
-                color={tagFilter === '' ? 'white' : 'gray.200'}
-                bg={tagFilter === '' ? 'blue.600' : 'transparent'}
+                color={tagFilter === t ? 'white' : 'gray.200'}
+                bg={tagFilter === t ? 'blue.600' : 'transparent'}
                 _hover={{ 
-                  bg: tagFilter === '' ? 'blue.700' : 'gray.700',
+                  bg: tagFilter === t ? 'blue.700' : 'gray.700',
                   color: 'white'
                 }}
               >
-                All
+                #{t}
               </Button>
-              {tags.map(t => (
-                <Button
-                  key={t}
-                  size="sm"
-                  variant={tagFilter === t ? 'solid' : 'outline'}
-                  colorScheme={tagFilter === t ? 'blue' : undefined}
-                  onClick={() => setTagFilter(t)}
-                  borderColor="gray.600"
-                  color={tagFilter === t ? 'white' : 'gray.200'}
-                  bg={tagFilter === t ? 'blue.600' : 'transparent'}
-                  _hover={{ 
-                    bg: tagFilter === t ? 'blue.700' : 'gray.700',
-                    color: 'white'
-                  }}
-                >
-                  #{t}
-                </Button>
-              ))}
-            </HStack>
-          </Box>
+            ))}
+          </Flex>
+          {tags.length > 0 && (
+            <Button
+              size="sm"
+              variant="ghost"
+              colorScheme="blue"
+              onClick={() => setShowAllTags(!showAllTags)}
+              mt={2}
+            >
+              {showAllTags ? 'Show less' : 'More...'}
+            </Button>
+          )}
         </Box>
 
         {tagFilter && (
