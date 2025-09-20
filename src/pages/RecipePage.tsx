@@ -76,7 +76,9 @@ export default function RecipePage() {
     (match, alt, filename) => {
       // Use the actual package folder name if available, otherwise fall back to slug
       const folderName = recipe.packageFolder || `${recipe.slug}.recipepackage`;
-      const packageBase = `${import.meta.env.BASE_URL}recipes/${folderName}/Photos/`;
+      // Encode the folder name to handle spaces and special characters
+      const encodedFolderName = encodeURIComponent(folderName).replace(/%20/g, '%20');
+      const packageBase = `${import.meta.env.BASE_URL}recipes/${encodedFolderName}/Photos/`;
       return `![${alt}](${packageBase}${filename})`;
     }
   );
