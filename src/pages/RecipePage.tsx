@@ -14,9 +14,8 @@ import {
   Center,
   Link,
   VStack,
-  Button,
-  HStack,
 } from '@chakra-ui/react';
+import Header from '../components/Header';
 
 interface Recipe {
   title: string;
@@ -64,9 +63,12 @@ export default function RecipePage() {
 
   if (!recipe) {
     return (
-      <Center h="100vh">
-        <Spinner size="xl" color="blue.400" />
-      </Center>
+      <>
+        <Header />
+        <Center h="100vh">
+          <Spinner size="xl" color="blue.400" />
+        </Center>
+      </>
     );
   }
 
@@ -84,16 +86,14 @@ export default function RecipePage() {
   );
 
   return (
-    <Container maxW="container.md" py={8}>
-      <Box color="gray.100">
+    <>
+      <Header recipeName={recipe.title} onDownload={downloadRecipe} />
+      <Container maxW="container.md" py={8}>
+        <Box color="gray.100">
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
           components={{
-            h1: ({ children }) => (
-              <Heading as="h1" size="2xl" mb={6} color="gray.100">
-                {children}
-              </Heading>
-            ),
+            h1: () => null, // Skip rendering h1 since title is in the header
             h2: ({ children }) => (
               <Heading as="h2" size="xl" mt={8} mb={4} color="gray.200">
                 {children}
@@ -232,32 +232,7 @@ export default function RecipePage() {
           {processedContent}
         </ReactMarkdown>
       </Box>
-      
-      <Box as="hr" my={8} borderTop="1px solid" borderColor="gray.700" />
-      
-      <HStack justify="space-between" align="center">
-        <Link
-          as={RouterLink}
-          to="/"
-          color="blue.400"
-          _hover={{ color: 'blue.300', textDecoration: 'none' }}
-          fontSize="lg"
-          display="inline-block"
-        >
-          ← Back to search
-        </Link>
-        
-        <Button
-          onClick={downloadRecipe}
-          colorScheme="blue"
-          size="sm"
-          variant="outline"
-          color="blue.400"
-          _hover={{ color: 'blue.300' }}
-        >
-          Download Recipe
-        </Button>
-      </HStack>
     </Container>
+    </>
   );
 }

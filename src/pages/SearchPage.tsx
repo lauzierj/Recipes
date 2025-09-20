@@ -3,7 +3,6 @@ import { Link as RouterLink, useSearchParams } from 'react-router-dom';
 import {
   Box,
   Container,
-  Heading,
   Input,
   Button,
   HStack,
@@ -16,6 +15,7 @@ import {
   Flex,
   Link,
 } from '@chakra-ui/react';
+import Header from '../components/Header';
 
 interface Recipe {
   title: string;
@@ -145,10 +145,10 @@ export default function SearchPage() {
   );
 
   return (
-    <Container maxW="container.md" py={8}>
-      <VStack gap={6} align="stretch">
-        <Heading size="2xl" color="gray.100">Recipes</Heading>
-        
+    <>
+      <Header />
+      <Container maxW="container.md" py={8}>
+        <VStack gap={6} align="stretch">
         <Input
           placeholder="Search recipes..."
           value={query}
@@ -311,5 +311,6 @@ export default function SearchPage() {
         </VStack>
       </VStack>
     </Container>
+    </>
   );
 }
