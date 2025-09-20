@@ -42,6 +42,7 @@ When implementing changes to the codebase:
    - Include both before and after states when modifying existing features
    - Show responsive views for UI changes
    - Name screenshots descriptively (e.g., `homepage-recipe-list.png`, `recipe-detail-view.png`)
+   - **IMPORTANT**: All screenshots must be no larger than 8000px in either dimension before being processed by Claude APIs
 
 4. **Documentation format**:
    - Create a `README.md` in the branch folder explaining:

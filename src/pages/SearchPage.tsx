@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Link as RouterLink, useSearchParams } from 'react-router-dom';
 import {
   Box,
@@ -31,6 +31,10 @@ export default function SearchPage() {
   const [tags, setTags] = useState<string[]>([]);
   const [query, setQuery] = useState(searchParams.get('q') || '');
   const [tagFilter, setTagFilter] = useState(searchParams.get('tag') || '');
+  const [showAllTags, setShowAllTags] = useState(false);
+  const [isOverflowing, setIsOverflowing] = useState(false);
+  const [collapsedHeight, setCollapsedHeight] = useState<number | null>(null);
+  const tagContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const base = import.meta.env.BASE_URL;
@@ -50,8 +54,24 @@ export default function SearchPage() {
           return { ...recipe, description };
         });
         setRecipes(recipesWithDescription);
+
+        // Count tag frequencies and sort by frequency
+        const tagFrequency = new Map<string, number>();
+        recipesWithDescription.forEach(recipe => {
+          recipe.tags.forEach(tag => {
+            tagFrequency.set(tag, (tagFrequency.get(tag) || 0) + 1);
+          });
+        });
+
+        // Sort tags by frequency (descending)
+        const sortedTags = Array.from(tagFrequency.keys()).sort((a, b) => {
+          const freqDiff = tagFrequency.get(b)! - tagFrequency.get(a)!;
+          if (freqDiff !== 0) return freqDiff;
+          return a.localeCompare(b); // Alphabetical if same frequency
+        });
+
+        setTags(sortedTags);
       });
-    fetch(`${base}tags.json`).then(r => r.json()).then(setTags);
   }, []);
 
   useEffect(() => {
@@ -60,6 +80,63 @@ export default function SearchPage() {
     if (tagFilter) params.set('tag', tagFilter);
     setSearchParams(params);
   }, [query, tagFilter, setSearchParams]);
+
+  // Measure tag buttons to determine the collapsed height (2 rows + padding)
+  useEffect(() => {
+    const parseSizeValue = (value: string | null) => {
+      if (!value) return 0;
+      const parsed = parseFloat(value);
+      return Number.isNaN(parsed) ? 0 : parsed;
+    };
+
+    const updateMeasurements = () => {
+      const container = tagContainerRef.current;
+      if (!container) {
+        setCollapsedHeight(null);
+        setIsOverflowing(false);
+        return;
+      }
+
+      const firstButton = container.querySelector('button');
+      if (!firstButton) {
+        setCollapsedHeight(null);
+        setIsOverflowing(false);
+        return;
+      }
+
+      const style = window.getComputedStyle(container);
+      const paddingTop = parseSizeValue(style.paddingTop);
+      const paddingBottom = parseSizeValue(style.paddingBottom);
+      const rowGapRaw = style.rowGap && style.rowGap !== 'normal' ? style.rowGap : '';
+      const gapRaw = style.gap && style.gap !== 'normal' ? style.gap : '';
+      const rowGap = parseSizeValue(rowGapRaw || gapRaw);
+      const buttonHeight = firstButton.getBoundingClientRect().height;
+
+      if (buttonHeight === 0) {
+        setIsOverflowing(false);
+        return;
+      }
+
+      const desiredHeight = Math.ceil(buttonHeight * 2 + paddingTop + paddingBottom + rowGap);
+
+      setCollapsedHeight(prev => (prev === null || prev !== desiredHeight ? desiredHeight : prev));
+      setIsOverflowing(container.scrollHeight - desiredHeight > 1);
+    };
+
+    updateMeasurements();
+
+    window.addEventListener('resize', updateMeasurements);
+
+    const resizeObserver = new ResizeObserver(updateMeasurements);
+    if (tagContainerRef.current) {
+      resizeObserver.observe(tagContainerRef.current);
+    }
+
+    return () => {
+      window.removeEventListener('resize', updateMeasurements);
+      resizeObserver.disconnect();
+    };
+  }, [tags]);
 
   const filtered = recipes.filter(r =>
     (!tagFilter || r.tags.includes(tagFilter)) &&
@@ -86,24 +163,21 @@ export default function SearchPage() {
 
         <Box>
           <Text fontWeight="bold" mb={3} color="gray.300">Filter by tag:</Text>
-          <Box
-            overflowX="auto"
-            whiteSpace="nowrap"
-            pb={2}
-            css={{
-              '&::-webkit-scrollbar': {
-                height: '6px',
-              },
-              '&::-webkit-scrollbar-track': {
-                background: 'transparent',
-              },
-              '&::-webkit-scrollbar-thumb': {
-                background: 'var(--chakra-colors-gray-600)',
-                borderRadius: '4px',
-              },
-            }}
-          >
-            <HStack gap={2} display="inline-flex">
+          <Box position="relative">
+            <Flex
+              ref={tagContainerRef}
+              gap={2}
+              flexWrap="wrap"
+              maxH={
+                showAllTags
+                  ? 'none'
+                  : collapsedHeight !== null
+                    ? `${collapsedHeight}px`
+                    : undefined
+              }
+              overflow={showAllTags ? 'visible' : 'hidden'}
+              pb={2}
+            >
               <Button
                 size="sm"
                 variant={tagFilter === '' ? 'solid' : 'outline'}
@@ -112,7 +186,7 @@ export default function SearchPage() {
                 borderColor="gray.600"
                 color={tagFilter === '' ? 'white' : 'gray.200'}
                 bg={tagFilter === '' ? 'blue.600' : 'transparent'}
-                _hover={{ 
+                _hover={{
                   bg: tagFilter === '' ? 'blue.700' : 'gray.700',
                   color: 'white'
                 }}
@@ -129,7 +203,7 @@ export default function SearchPage() {
                   borderColor="gray.600"
                   color={tagFilter === t ? 'white' : 'gray.200'}
                   bg={tagFilter === t ? 'blue.600' : 'transparent'}
-                  _hover={{ 
+                  _hover={{
                     bg: tagFilter === t ? 'blue.700' : 'gray.700',
                     color: 'white'
                   }}
@@ -137,7 +211,19 @@ export default function SearchPage() {
                   #{t}
                 </Button>
               ))}
-            </HStack>
+            </Flex>
+            {isOverflowing && (
+              <Button
+                size="sm"
+                variant="ghost"
+                color="blue.400"
+                onClick={() => setShowAllTags(!showAllTags)}
+                mt={2}
+                _hover={{ bg: 'gray.700' }}
+              >
+                {showAllTags ? 'Show less' : 'More...'}
+              </Button>
+            )}
           </Box>
         </Box>
 
