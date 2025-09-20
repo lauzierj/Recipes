@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Link as RouterLink, useSearchParams } from 'react-router-dom';
 import {
   Box,
@@ -32,6 +32,8 @@ export default function SearchPage() {
   const [query, setQuery] = useState(searchParams.get('q') || '');
   const [tagFilter, setTagFilter] = useState(searchParams.get('tag') || '');
   const [showAllTags, setShowAllTags] = useState(false);
+  const [isOverflowing, setIsOverflowing] = useState(false);
+  const tagContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const base = import.meta.env.BASE_URL;
@@ -78,6 +80,34 @@ export default function SearchPage() {
     setSearchParams(params);
   }, [query, tagFilter, setSearchParams]);
 
+  // Check if the tag container overflows
+  useEffect(() => {
+    const checkOverflow = () => {
+      if (tagContainerRef.current) {
+        const { scrollHeight, clientHeight } = tagContainerRef.current;
+        // Check if content height exceeds the collapsed height (76px)
+        setIsOverflowing(scrollHeight > 76);
+      }
+    };
+
+    // Check on mount and when tags change
+    checkOverflow();
+
+    // Also check on window resize
+    window.addEventListener('resize', checkOverflow);
+
+    // Use ResizeObserver for more accurate detection
+    const resizeObserver = new ResizeObserver(checkOverflow);
+    if (tagContainerRef.current) {
+      resizeObserver.observe(tagContainerRef.current);
+    }
+
+    return () => {
+      window.removeEventListener('resize', checkOverflow);
+      resizeObserver.disconnect();
+    };
+  }, [tags, showAllTags]);
+
   const filtered = recipes.filter(r =>
     (!tagFilter || r.tags.includes(tagFilter)) &&
     (r.title.toLowerCase().includes(query.toLowerCase()) ||
@@ -105,6 +135,7 @@ export default function SearchPage() {
           <Text fontWeight="bold" mb={3} color="gray.300">Filter by tag:</Text>
           <Box position="relative">
             <Flex
+              ref={tagContainerRef}
               gap={2}
               flexWrap="wrap"
               maxH={showAllTags ? "none" : "76px"}
@@ -145,7 +176,7 @@ export default function SearchPage() {
                 </Button>
               ))}
             </Flex>
-            {tags.length > 10 && (
+            {isOverflowing && (
               <Button
                 size="sm"
                 variant="ghost"
