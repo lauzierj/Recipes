@@ -33,6 +33,7 @@ export default function SearchPage() {
   const [tagFilter, setTagFilter] = useState(searchParams.get('tag') || '');
   const [showAllTags, setShowAllTags] = useState(false);
   const [isOverflowing, setIsOverflowing] = useState(false);
+  const [collapsedHeight, setCollapsedHeight] = useState<number | null>(null);
   const tagContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -80,33 +81,62 @@ export default function SearchPage() {
     setSearchParams(params);
   }, [query, tagFilter, setSearchParams]);
 
-  // Check if the tag container overflows
+  // Measure tag buttons to determine the collapsed height (2 rows + padding)
   useEffect(() => {
-    const checkOverflow = () => {
-      if (tagContainerRef.current) {
-        const { scrollHeight, clientHeight } = tagContainerRef.current;
-        // Check if content height exceeds the collapsed height (76px)
-        setIsOverflowing(scrollHeight > 76);
-      }
+    const parseSizeValue = (value: string | null) => {
+      if (!value) return 0;
+      const parsed = parseFloat(value);
+      return Number.isNaN(parsed) ? 0 : parsed;
     };
 
-    // Check on mount and when tags change
-    checkOverflow();
+    const updateMeasurements = () => {
+      const container = tagContainerRef.current;
+      if (!container) {
+        setCollapsedHeight(null);
+        setIsOverflowing(false);
+        return;
+      }
 
-    // Also check on window resize
-    window.addEventListener('resize', checkOverflow);
+      const firstButton = container.querySelector('button');
+      if (!firstButton) {
+        setCollapsedHeight(null);
+        setIsOverflowing(false);
+        return;
+      }
 
-    // Use ResizeObserver for more accurate detection
-    const resizeObserver = new ResizeObserver(checkOverflow);
+      const style = window.getComputedStyle(container);
+      const paddingTop = parseSizeValue(style.paddingTop);
+      const paddingBottom = parseSizeValue(style.paddingBottom);
+      const rowGapRaw = style.rowGap && style.rowGap !== 'normal' ? style.rowGap : '';
+      const gapRaw = style.gap && style.gap !== 'normal' ? style.gap : '';
+      const rowGap = parseSizeValue(rowGapRaw || gapRaw);
+      const buttonHeight = firstButton.getBoundingClientRect().height;
+
+      if (buttonHeight === 0) {
+        setIsOverflowing(false);
+        return;
+      }
+
+      const desiredHeight = Math.ceil(buttonHeight * 2 + paddingTop + paddingBottom + rowGap);
+
+      setCollapsedHeight(prev => (prev === null || prev !== desiredHeight ? desiredHeight : prev));
+      setIsOverflowing(container.scrollHeight - desiredHeight > 1);
+    };
+
+    updateMeasurements();
+
+    window.addEventListener('resize', updateMeasurements);
+
+    const resizeObserver = new ResizeObserver(updateMeasurements);
     if (tagContainerRef.current) {
       resizeObserver.observe(tagContainerRef.current);
     }
 
     return () => {
-      window.removeEventListener('resize', checkOverflow);
+      window.removeEventListener('resize', updateMeasurements);
       resizeObserver.disconnect();
     };
-  }, [tags, showAllTags]);
+  }, [tags]);
 
   const filtered = recipes.filter(r =>
     (!tagFilter || r.tags.includes(tagFilter)) &&
@@ -138,8 +168,14 @@ export default function SearchPage() {
               ref={tagContainerRef}
               gap={2}
               flexWrap="wrap"
-              maxH={showAllTags ? "none" : "76px"}
-              overflow="hidden"
+              maxH={
+                showAllTags
+                  ? 'none'
+                  : collapsedHeight !== null
+                    ? `${collapsedHeight}px`
+                    : undefined
+              }
+              overflow={showAllTags ? 'visible' : 'hidden'}
               pb={2}
             >
               <Button
