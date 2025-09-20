@@ -31,6 +31,7 @@ export default function SearchPage() {
   const [tags, setTags] = useState<string[]>([]);
   const [query, setQuery] = useState(searchParams.get('q') || '');
   const [tagFilter, setTagFilter] = useState(searchParams.get('tag') || '');
+  const [showAllTags, setShowAllTags] = useState(false);
 
   useEffect(() => {
     const base = import.meta.env.BASE_URL;
@@ -50,8 +51,24 @@ export default function SearchPage() {
           return { ...recipe, description };
         });
         setRecipes(recipesWithDescription);
+
+        // Count tag frequencies and sort by frequency
+        const tagFrequency = new Map<string, number>();
+        recipesWithDescription.forEach(recipe => {
+          recipe.tags.forEach(tag => {
+            tagFrequency.set(tag, (tagFrequency.get(tag) || 0) + 1);
+          });
+        });
+
+        // Sort tags by frequency (descending)
+        const sortedTags = Array.from(tagFrequency.keys()).sort((a, b) => {
+          const freqDiff = tagFrequency.get(b)! - tagFrequency.get(a)!;
+          if (freqDiff !== 0) return freqDiff;
+          return a.localeCompare(b); // Alphabetical if same frequency
+        });
+
+        setTags(sortedTags);
       });
-    fetch(`${base}tags.json`).then(r => r.json()).then(setTags);
   }, []);
 
   useEffect(() => {
@@ -86,24 +103,14 @@ export default function SearchPage() {
 
         <Box>
           <Text fontWeight="bold" mb={3} color="gray.300">Filter by tag:</Text>
-          <Box
-            overflowX="auto"
-            whiteSpace="nowrap"
-            pb={2}
-            css={{
-              '&::-webkit-scrollbar': {
-                height: '6px',
-              },
-              '&::-webkit-scrollbar-track': {
-                background: 'transparent',
-              },
-              '&::-webkit-scrollbar-thumb': {
-                background: 'var(--chakra-colors-gray-600)',
-                borderRadius: '4px',
-              },
-            }}
-          >
-            <HStack gap={2} display="inline-flex">
+          <Box position="relative">
+            <Flex
+              gap={2}
+              flexWrap="wrap"
+              maxH={showAllTags ? "none" : "76px"}
+              overflow="hidden"
+              pb={2}
+            >
               <Button
                 size="sm"
                 variant={tagFilter === '' ? 'solid' : 'outline'}
@@ -112,7 +119,7 @@ export default function SearchPage() {
                 borderColor="gray.600"
                 color={tagFilter === '' ? 'white' : 'gray.200'}
                 bg={tagFilter === '' ? 'blue.600' : 'transparent'}
-                _hover={{ 
+                _hover={{
                   bg: tagFilter === '' ? 'blue.700' : 'gray.700',
                   color: 'white'
                 }}
@@ -129,7 +136,7 @@ export default function SearchPage() {
                   borderColor="gray.600"
                   color={tagFilter === t ? 'white' : 'gray.200'}
                   bg={tagFilter === t ? 'blue.600' : 'transparent'}
-                  _hover={{ 
+                  _hover={{
                     bg: tagFilter === t ? 'blue.700' : 'gray.700',
                     color: 'white'
                   }}
@@ -137,7 +144,19 @@ export default function SearchPage() {
                   #{t}
                 </Button>
               ))}
-            </HStack>
+            </Flex>
+            {tags.length > 10 && (
+              <Button
+                size="sm"
+                variant="ghost"
+                color="blue.400"
+                onClick={() => setShowAllTags(!showAllTags)}
+                mt={2}
+                _hover={{ bg: 'gray.700' }}
+              >
+                {showAllTags ? 'Show less' : 'More...'}
+              </Button>
+            )}
           </Box>
         </Box>
 
