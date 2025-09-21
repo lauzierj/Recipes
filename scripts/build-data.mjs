@@ -34,6 +34,7 @@ async function build() {
   const files = await getRecipeFiles(dir);
   const recipes = [];
   const allTags = new Set();
+  const processedSlugs = new Set();
 
   for (const file of files) {
     if (basename(file) === "All Tags.recipe") continue;
@@ -43,14 +44,30 @@ async function build() {
     const tags = extractTags(content);
     tags.forEach(t => allTags.add(t));
     const slug = slugify(title);
-    
+
     // Check if this is a recipepackage
     const parentDir = basename(dirname(file));
     const packageFolder = parentDir.endsWith('.recipepackage') ? parentDir : null;
-    
+
+    // Skip standalone .recipe files if we already have a .recipepackage version
+    if (!packageFolder && processedSlugs.has(slug)) {
+      continue;
+    }
+
     const recipe = { title, slug, tags, content };
     if (packageFolder) {
       recipe.packageFolder = packageFolder;
+      // Mark this slug as processed from a package
+      processedSlugs.add(slug);
+    } else {
+      // Check if there's a .recipepackage version that will be processed later
+      const hasPackageVersion = files.some(f =>
+        basename(dirname(f)).endsWith('.recipepackage') &&
+        f.endsWith(`/${title}.recipe`)
+      );
+      if (hasPackageVersion) {
+        continue; // Skip standalone if package version exists
+      }
     }
     recipes.push(recipe);
   }
