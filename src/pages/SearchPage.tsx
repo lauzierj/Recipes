@@ -72,11 +72,12 @@ export default function SearchPage() {
         });
         setRecipes(recipesWithDescription);
 
-        // Get 10 random recipes with photos for the landing page
+        // Get 11 random recipes with photos for the landing page
+        // (1 hero recipe + 10 in 2-column grid = 5 complete rows)
         const recipesWithPhotos = recipesWithDescription.filter(r => r.firstImage && r.description);
         const randomFeatured = [...recipesWithPhotos]
           .sort(() => Math.random() - 0.5)
-          .slice(0, 10);
+          .slice(0, 11);
         setFeaturedRecipes(randomFeatured);
 
         // Count tag frequencies and sort by frequency
