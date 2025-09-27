@@ -134,13 +134,14 @@ export default function RecipePage() {
                 const tag = children.substring(1);
                 return (
                   <Link
-                    as={RouterLink}
-                    to={`/?tag=${encodeURIComponent(tag)}`}
+                    asChild
                     color="blue.400"
                     _hover={{ color: 'blue.300' }}
                     display="inline"
                   >
-                    {children}
+                    <RouterLink to={`/?tag=${encodeURIComponent(tag)}`}>
+                      {children}
+                    </RouterLink>
                   </Link>
                 );
               }
@@ -171,7 +172,7 @@ export default function RecipePage() {
                 
                 return (
                   <Box as="li" mb={2}>
-                    <VStack align="start" spacing={0}>
+                    <VStack align="start" gap={0}>
                       <Text color="gray.100" fontWeight="medium" fontSize="md">
                         {ingredientName}
                       </Text>
@@ -237,14 +238,15 @@ export default function RecipePage() {
       
       <HStack justify="space-between" align="center">
         <Link
-          as={RouterLink}
-          to="/"
+          asChild
           color="blue.400"
           _hover={{ color: 'blue.300', textDecoration: 'none' }}
           fontSize="lg"
           display="inline-block"
         >
-          ← Back to search
+          <RouterLink to="/">
+            ← Back to search
+          </RouterLink>
         </Link>
         
         <Button

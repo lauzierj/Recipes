@@ -308,8 +308,7 @@ export default function SearchPage() {
               {featuredRecipes.map((recipe, index) => (
                 <Box
                   key={recipe.slug}
-                  as={RouterLink}
-                  to={`/recipe/${recipe.slug}`}
+                  asChild
                   display="block"
                   _hover={{ textDecoration: 'none' }}
                   role="group"
@@ -323,6 +322,7 @@ export default function SearchPage() {
                   }}
                   gridColumn={index === 0 ? { md: 'span 2' } : undefined}
                 >
+                  <RouterLink to={`/recipe/${recipe.slug}`}>
                   {recipe.firstImage && (
                     <AspectRatio ratio={index === 0 ? 21 / 9 : 16 / 9}>
                       <Image
@@ -347,12 +347,13 @@ export default function SearchPage() {
                       <Text
                         fontSize={index === 0 ? 'md' : 'sm'}
                         color="gray.400"
-                        noOfLines={index === 0 ? 3 : 2}
+                        lineClamp={index === 0 ? 3 : 2}
                       >
                         {recipe.description}
                       </Text>
                     )}
                   </Box>
+                  </RouterLink>
                 </Box>
               ))}
             </Grid>
@@ -363,8 +364,7 @@ export default function SearchPage() {
             {filtered.map(r => (
             <Box
               key={r.slug}
-              as={RouterLink}
-              to={`/recipe/${r.slug}`}
+              asChild
               p={4}
               borderBottom="1px"
               borderColor="gray.700"
@@ -373,6 +373,7 @@ export default function SearchPage() {
               cursor="pointer"
               display="block"
             >
+              <RouterLink to={`/recipe/${r.slug}`}>
               <Text
                 fontSize="lg"
                 fontWeight="medium"
@@ -386,7 +387,7 @@ export default function SearchPage() {
                   fontSize="sm"
                   color="gray.400"
                   mb={2}
-                  noOfLines={2}
+                  lineClamp={2}
                 >
                   {r.description}
                 </Text>
@@ -430,6 +431,7 @@ export default function SearchPage() {
                   </HStack>
                 </Box>
               )}
+              </RouterLink>
             </Box>
           ))}
           </VStack>
