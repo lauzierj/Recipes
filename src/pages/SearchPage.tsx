@@ -42,6 +42,38 @@ export default function SearchPage() {
   const [collapsedHeight, setCollapsedHeight] = useState<number | null>(null);
   const tagContainerRef = useRef<HTMLDivElement>(null);
 
+  // Seeded pseudo-random number generator
+  const seededRandom = (seed: number) => {
+    const x = Math.sin(seed) * 10000;
+    return x - Math.floor(x);
+  };
+
+  // Generate hash from string
+  const hashString = (str: string): number => {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32-bit integer
+    }
+    return Math.abs(hash);
+  };
+
+  // Deterministic shuffle using Fisher-Yates algorithm with seeded random
+  const deterministicShuffle = <T,>(array: T[], seed: number): T[] => {
+    const result = [...array];
+    let currentSeed = seed;
+
+    for (let i = result.length - 1; i > 0; i--) {
+      currentSeed = hashString(currentSeed.toString());
+      const randomValue = seededRandom(currentSeed);
+      const j = Math.floor(randomValue * (i + 1));
+      [result[i], result[j]] = [result[j], result[i]];
+    }
+
+    return result;
+  };
+
   useEffect(() => {
     const base = import.meta.env.BASE_URL;
     fetch(`${base}recipes.json`)
@@ -72,13 +104,19 @@ export default function SearchPage() {
         });
         setRecipes(recipesWithDescription);
 
-        // Get 11 random recipes with photos for the landing page
+        // Get featured recipes using date-based deterministic selection
         // (1 hero recipe + 10 in 2-column grid = 5 complete rows)
         const recipesWithPhotos = recipesWithDescription.filter(r => r.firstImage && r.description);
-        const randomFeatured = [...recipesWithPhotos]
-          .sort(() => Math.random() - 0.5)
-          .slice(0, 11);
-        setFeaturedRecipes(randomFeatured);
+
+        // Generate seed from today's date
+        const today = new Date();
+        const dateString = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+        const dateSeed = hashString(dateString);
+
+        // Deterministically shuffle and select recipes
+        const shuffledRecipes = deterministicShuffle(recipesWithPhotos, dateSeed);
+        const featuredSelection = shuffledRecipes.slice(0, 11);
+        setFeaturedRecipes(featuredSelection);
 
         // Count tag frequencies and sort by frequency
         const tagFrequency = new Map<string, number>();
