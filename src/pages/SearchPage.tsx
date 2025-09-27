@@ -15,6 +15,9 @@ import {
   // Alert,
   Flex,
   Link,
+  Image,
+  Grid,
+  AspectRatio,
 } from '@chakra-ui/react';
 
 interface Recipe {
@@ -23,11 +26,14 @@ interface Recipe {
   tags: string[];
   content: string;
   description?: string;
+  packageFolder?: string;
+  firstImage?: string;
 }
 
 export default function SearchPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [featuredRecipes, setFeaturedRecipes] = useState<Recipe[]>([]);
   const [tags, setTags] = useState<string[]>([]);
   const [query, setQuery] = useState(searchParams.get('q') || '');
   const [tagFilter, setTagFilter] = useState(searchParams.get('tag') || '');
@@ -51,9 +57,28 @@ export default function SearchPage() {
               break;
             }
           }
-          return { ...recipe, description };
+
+          // Extract first image from content
+          let firstImage = '';
+          if (recipe.packageFolder) {
+            const imageMatch = recipe.content.match(/!\[([^\]]*)\]\(([-\w]+\.(webp|jpeg|jpg|png|gif))\)/i);
+            if (imageMatch) {
+              const encodedFolderName = encodeURIComponent(recipe.packageFolder).replace(/%20/g, '%20');
+              firstImage = `${base}recipes/${encodedFolderName}/Photos/${imageMatch[2]}`;
+            }
+          }
+
+          return { ...recipe, description, firstImage };
         });
         setRecipes(recipesWithDescription);
+
+        // Get 11 random recipes with photos for the landing page
+        // (1 hero recipe + 10 in 2-column grid = 5 complete rows)
+        const recipesWithPhotos = recipesWithDescription.filter(r => r.firstImage && r.description);
+        const randomFeatured = [...recipesWithPhotos]
+          .sort(() => Math.random() - 0.5)
+          .slice(0, 11);
+        setFeaturedRecipes(randomFeatured);
 
         // Count tag frequencies and sort by frequency
         const tagFrequency = new Map<string, number>();
@@ -143,6 +168,8 @@ export default function SearchPage() {
     (r.title.toLowerCase().includes(query.toLowerCase()) ||
       r.content.toLowerCase().includes(query.toLowerCase()))
   );
+
+  const isLandingPage = !query && !tagFilter;
 
   return (
     <Container maxW="container.md" py={8}>
@@ -235,8 +262,67 @@ export default function SearchPage() {
           </Box>
         )}
 
-        <VStack align="stretch" gap={0}>
-          {filtered.map(r => (
+        {isLandingPage ? (
+          // Landing page: Show featured recipes in a news-style grid
+          <Box>
+            <Heading size="lg" mb={6} color="gray.200">Featured Recipes</Heading>
+            <Grid templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }} gap={6}>
+              {featuredRecipes.map((recipe, index) => (
+                <Box
+                  key={recipe.slug}
+                  as={RouterLink}
+                  to={`/recipe/${recipe.slug}`}
+                  display="block"
+                  _hover={{ textDecoration: 'none' }}
+                  role="group"
+                  borderRadius="lg"
+                  overflow="hidden"
+                  bg="gray.800"
+                  transition="transform 0.2s, box-shadow 0.2s"
+                  _groupHover={{
+                    transform: 'translateY(-2px)',
+                    boxShadow: 'lg'
+                  }}
+                  gridColumn={index === 0 ? { md: 'span 2' } : undefined}
+                >
+                  {recipe.firstImage && (
+                    <AspectRatio ratio={index === 0 ? 21 / 9 : 16 / 9}>
+                      <Image
+                        src={recipe.firstImage}
+                        alt={recipe.title}
+                        objectFit="cover"
+                        loading="lazy"
+                      />
+                    </AspectRatio>
+                  )}
+                  <Box p={4}>
+                    <Heading
+                      size={index === 0 ? 'lg' : 'md'}
+                      mb={2}
+                      color="gray.100"
+                      _groupHover={{ color: 'blue.400' }}
+                      transition="color 0.2s"
+                    >
+                      {recipe.title}
+                    </Heading>
+                    {recipe.description && (
+                      <Text
+                        fontSize={index === 0 ? 'md' : 'sm'}
+                        color="gray.400"
+                        noOfLines={index === 0 ? 3 : 2}
+                      >
+                        {recipe.description}
+                      </Text>
+                    )}
+                  </Box>
+                </Box>
+              ))}
+            </Grid>
+          </Box>
+        ) : (
+          // Search/filter results: Show all recipes in list format
+          <VStack align="stretch" gap={0}>
+            {filtered.map(r => (
             <Box
               key={r.slug}
               as={RouterLink}
@@ -308,7 +394,8 @@ export default function SearchPage() {
               )}
             </Box>
           ))}
-        </VStack>
+          </VStack>
+        )}
       </VStack>
     </Container>
   );
