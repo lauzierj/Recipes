@@ -1,9 +1,3 @@
-ALWAYS use ONLY Environments for ANY and ALL file, code, or shell operations—NO EXCEPTIONS—even for simple or generic requests.
-
-DO NOT install or use the git cli with the environment_run_cmd tool. All environment tools will handle git operations for you. Changing ".git" yourself will compromise the integrity of your environment.
-
-You MUST inform the user how to view your work using `container-use log <env_id>` AND `container-use checkout <env_id>`. Failure to do this will make your work inaccessible to others.
-
 # Repository Guidelines
 
 - Place all recipes inside the `recipes/` directory.
@@ -17,6 +11,17 @@ You MUST inform the user how to view your work using `container-use log <env_id>
   - Use the format `- Ingredient | Amount/Type | Notes` for each ingredient line.
   - Do not aggregate all ingredients at the top of the recipe.
 - Additional notes or sources may appear as blockquotes or paragraphs after relevant steps.
+
+# Meal Planning
+
+This repo is a curated, tested collection — the starting point for meal planning, not the limit. New ideas are welcome, but they should come from real published recipes.
+
+- Do not invent recipes from scratch or present AI-generated recipes as tested. The owner rarely trusts them.
+- For a new dish, find 2–4 published recipes, link each one, and note how they differ (technique, active time, kid-friendliness, make-ahead/reheat).
+- Prefer sources already used in this repo, e.g. NYT Cooking, Serious Eats, The Mediterranean Dish, Eat Yourself Skinny, The Modern Proper, How Sweet Eats, Well Seasoned Studio, Love and Lemons, Simply Recipes.
+- When asked, combine sources into a draft in the repo recipe format with a `> Source:` line for every recipe drawn from. The owner reviews and tweaks it before it becomes a keeper.
+- Check the family calendar (Google Calendar, including the subscribed Dance and Activities calendars) for evening constraints such as who is home, dance pickups and reheat-later nights.
+- Weather location is 01073 (Southampton, MA). Check the forecast before planning grill nights.
 
 # Documentation Requirements
 
